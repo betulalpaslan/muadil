@@ -1,0 +1,16 @@
+D:\muadil\backend\Muadil.Infrastructure\bin\Debug\net10.0\Muadil.Infrastructure.deps.json
+D:\muadil\backend\Muadil.Infrastructure\bin\Debug\net10.0\Muadil.Infrastructure.dll
+D:\muadil\backend\Muadil.Infrastructure\bin\Debug\net10.0\Muadil.Infrastructure.pdb
+D:\muadil\backend\Muadil.Infrastructure\bin\Debug\net10.0\Muadil.Domain.dll
+D:\muadil\backend\Muadil.Infrastructure\bin\Debug\net10.0\Muadil.Domain.pdb
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.csproj.AssemblyReference.cache
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.AssemblyInfoInputs.cache
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.AssemblyInfo.cs
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.csproj.CoreCompileInputs.cache
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.sourcelink.json
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.I.DA93CB3A.Up2Date
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.dll
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\refint\Muadil.Infrastructure.dll
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\Muadil.Infrastructure.pdb
+D:\muadil\backend\Muadil.Infrastructure\obj\Debug\net10.0\ref\Muadil.Infrastructure.dll

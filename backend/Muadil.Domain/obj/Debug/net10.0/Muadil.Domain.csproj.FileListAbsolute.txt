@@ -1,0 +1,12 @@
+D:\muadil\backend\Muadil.Domain\bin\Debug\net10.0\Muadil.Domain.deps.json
+D:\muadil\backend\Muadil.Domain\bin\Debug\net10.0\Muadil.Domain.dll
+D:\muadil\backend\Muadil.Domain\bin\Debug\net10.0\Muadil.Domain.pdb
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.AssemblyInfoInputs.cache
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.AssemblyInfo.cs
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.csproj.CoreCompileInputs.cache
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.sourcelink.json
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.dll
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\refint\Muadil.Domain.dll
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\Muadil.Domain.pdb
+D:\muadil\backend\Muadil.Domain\obj\Debug\net10.0\ref\Muadil.Domain.dll
