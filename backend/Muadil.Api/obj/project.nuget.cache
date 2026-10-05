@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "b5DkXaQ6/NY=",
+  "success": true,
+  "projectFilePath": "D:\\muadil\\backend\\Muadil.Api\\Muadil.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\betul\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "C:\\Users\\betul\\.nuget\\packages\\microsoft.openapi\\2.12.0\\microsoft.openapi.2.12.0.nupkg.sha512"
+  ],
+  "logs": []
+}
