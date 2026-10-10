@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Muadil.Api.Dtos;
+using Muadil.Domain.Abstractions;
 using Muadil.Domain.Entities;
 using Muadil.Infrastructure.Persistence;
-using Muadil.Domain.Abstractions;
 
 namespace Muadil.Api.Controllers;
 
@@ -22,12 +22,18 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
             var desen = $"%{ara.Trim()}%";
             sorgu = sorgu.Where(p =>
                 EF.Functions.ILike(p.Ad, desen) ||
-                EF.Functions.ILike(p.Marka.Ad, desen));
+                EF.Functions.ILike(p.Marka.Ad, desen) ||
+                p.Muadiller.Any(m =>
+                    EF.Functions.ILike(m.Kod, desen) ||
+                    EF.Functions.ILike(m.Marka.Ad + " " + m.Kod, desen)));
         }
 
         return await sorgu
             .OrderBy(p => p.Ad)
-            .Select(p => new ParfumListeDto(p.Id, p.Ad, p.Marka.Ad, p.Fiyat50ml, p.GorselUrl))
+            .Select(p => new ParfumListeDto(
+                p.Id, p.Ad, p.Marka.Ad, p.GorselUrl,
+                p.Muadiller.Count(),
+                p.Muadiller.Min(m => (decimal?)m.Fiyat)))
             .ToListAsync();
     }
 
@@ -37,7 +43,7 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
         var parfum = await db.Parfumler.AsNoTracking()
             .Where(p => p.Id == id)
             .Select(p => new ParfumDetayDto(
-                p.Id, p.Ad, p.MarkaId, p.Marka.Ad, p.Fiyat50ml, p.GorselUrl,
+                p.Id, p.Ad, p.MarkaId, p.Marka.Ad, p.GorselUrl,
                 p.Notalar
                     .OrderBy(pn => pn.Katman).ThenBy(pn => pn.Nota.Ad)
                     .Select(pn => new ParfumNotaDto(pn.NotaId, pn.Nota.Ad, pn.Katman))
@@ -64,7 +70,6 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
         {
             Ad = ad,
             MarkaId = dto.MarkaId,
-            Fiyat50ml = dto.Fiyat50ml,
             Notalar = dto.Notalar
                 .Select(n => new ParfumNota { NotaId = n.NotaId, Katman = n.Katman })
                 .ToList()
@@ -91,7 +96,6 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
 
         parfum.Ad = ad;
         parfum.MarkaId = dto.MarkaId;
-        parfum.Fiyat50ml = dto.Fiyat50ml;
 
         // Notaları farkıyla güncelle: çıkanları sil, kalanların katmanını güncelle, yenileri ekle
         var yeni = dto.Notalar.ToDictionary(n => n.NotaId, n => n.Katman);
@@ -105,7 +109,20 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
         await db.SaveChangesAsync();
         return NoContent();
     }
-        private static readonly Dictionary<string, string> IzinliTurler = new()
+
+    [Authorize(Roles = "admin")]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Sil(int id)
+    {
+        var parfum = await db.Parfumler.FindAsync(id);
+        if (parfum is null) return NotFound();
+
+        parfum.SilinmeTarihi = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    private static readonly Dictionary<string, string> IzinliTurler = new()
     {
         ["image/jpeg"] = ".jpg",
         ["image/png"] = ".png",
@@ -137,18 +154,6 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
             await gorselDeposu.SilAsync(eskiGorsel, ct);
 
         return Ok(new { gorselUrl = parfum.GorselUrl });
-    }
-
-    [Authorize(Roles = "admin")]
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Sil(int id)
-    {
-        var parfum = await db.Parfumler.FindAsync(id);
-        if (parfum is null) return NotFound();
-
-        parfum.SilinmeTarihi = DateTime.UtcNow;
-        await db.SaveChangesAsync();
-        return NoContent();
     }
 
     private async Task<ActionResult?> Dogrula(ParfumKaydetDto dto, string ad, int? haricId = null)

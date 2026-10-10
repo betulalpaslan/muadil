@@ -481,4 +481,5 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-.env
+*.env
+*backend/Muadil.Api/uploads/

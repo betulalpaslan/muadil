@@ -5,7 +5,8 @@ export async function apiIstek<T>(
   token?: string,
   secenekler: RequestInit = {}
 ): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {};
+  if (!(secenekler.body instanceof FormData)) headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const yanit = await fetch(`${API_URL}${yol}`, { ...secenekler, headers });

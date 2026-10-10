@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Muadil.Api.Auth;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.FileProviders;
+using Muadil.Domain.Abstractions;
+using Muadil.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,8 @@ builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddDbContext<MuadilDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Muadil")));
+    var uploadsYolu = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+builder.Services.AddSingleton<IGorselDeposu>(new DiskGorselDeposu(uploadsYolu, "/uploads"));
 
     builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -37,13 +42,20 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsYolu),
+    RequestPath = "/uploads"
+});
 
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<MuadilDbContext>();
+    await SeedData.LoadAsync(db);
 }
-
 app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
