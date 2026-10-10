@@ -4,7 +4,6 @@ public class Parfum
 {
     public int Id { get; set; }
     public string Ad { get; set; } = string.Empty;
-    public decimal Fiyat50ml { get; set; }
     public string? GorselUrl { get; set; }
     public DateTime? SilinmeTarihi { get; set; }
 

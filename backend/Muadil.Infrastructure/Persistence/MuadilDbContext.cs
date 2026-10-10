@@ -28,7 +28,6 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
         modelBuilder.Entity<Parfum>(e =>
         {
             e.Property(x => x.Ad).HasMaxLength(200).IsRequired();
-            e.Property(x => x.Fiyat50ml).HasPrecision(10, 2);
             e.HasOne(x => x.Marka).WithMany()
                 .HasForeignKey(x => x.MarkaId)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -46,7 +45,8 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
             e.HasOne(x => x.Marka).WithMany()
                 .HasForeignKey(x => x.MarkaId)
                 .OnDelete(DeleteBehavior.Restrict);
-            e.HasIndex(x => new { x.MarkaId, x.Kod }).IsUnique();
+            e.HasIndex(x => new { x.MarkaId, x.Kod }).IsUnique()
+                .HasFilter("\"SilinmeTarihi\" IS NULL");
             e.HasQueryFilter(x => x.SilinmeTarihi == null && x.Parfum.SilinmeTarihi == null);
             e.ToTable(t =>
             {

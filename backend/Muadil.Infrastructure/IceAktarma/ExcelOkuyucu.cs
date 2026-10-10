@@ -58,22 +58,20 @@ public static class ExcelOkuyucu
         foreach (var satir in sayfa.RowsUsed().Where(r => r.RowNumber() > 1))
         {
             string Hucre(int sutun) => satir.Cell(sutun).GetString().Trim();
-            if (Enumerable.Range(1, 6).All(s => Hucre(s) == "")) continue;
+            if (Enumerable.Range(1, 5).All(s => Hucre(s) == "")) continue;
 
             var hatalar = new List<string>();
             var marka = Hucre(1);
             var ad = Hucre(2);
-            var fiyat = Fiyat(satir.Cell(3));
-            var ust = Notalar(Hucre(4));
-            var orta = Notalar(Hucre(5));
-            var alt = Notalar(Hucre(6));
+            var ust = Notalar(Hucre(3));
+            var orta = Notalar(Hucre(4));
+            var alt = Notalar(Hucre(5));
             var hepsi = ust.Concat(orta).Concat(alt).ToList();
 
             if (marka == "") hatalar.Add("Marka boş.");
             else if (marka.Length > 100) hatalar.Add("Marka adı en fazla 100 karakter olabilir.");
             if (ad == "") hatalar.Add("Parfüm adı boş.");
             else if (ad.Length > 200) hatalar.Add("Parfüm adı en fazla 200 karakter olabilir.");
-            if (fiyat is null or < 1m or > 100000m) hatalar.Add("50 ml fiyat 1 ile 100000 arasında olmalı (ör. 4200 ya da 4200,50).");
             if (hepsi.Count == 0) hatalar.Add("En az bir nota girilmeli.");
             if (hepsi.Any(n => n.Length > 100)) hatalar.Add("Nota adları en fazla 100 karakter olabilir.");
 
@@ -83,7 +81,7 @@ public static class ExcelOkuyucu
             if (hatalar.Count > 0)
                 sonuc.Hatalar.AddRange(hatalar.Select(h => new SatirHatasi(ParfumSayfasi, satir.RowNumber(), h)));
             else
-                sonuc.Parfumler.Add(new ParfumSatiri(satir.RowNumber(), marka, ad, fiyat!.Value, ust, orta, alt));
+                sonuc.Parfumler.Add(new ParfumSatiri(satir.RowNumber(), marka, ad, ust, orta, alt));
         }
     }
 

@@ -88,7 +88,6 @@ public class IceAktarmaServisi(MuadilDbContext db)
 
             if (parfumler.TryGetValue(anahtar, out var mevcut))
             {
-                mevcut.Fiyat50ml = s.Fiyat50ml;
                 NotalariGuncelle(mevcut, hedef);
                 guncellenenParfum++;
             }
@@ -98,7 +97,6 @@ public class IceAktarmaServisi(MuadilDbContext db)
                 {
                     Ad = s.Ad,
                     Marka = marka,
-                    Fiyat50ml = s.Fiyat50ml,
                     Notalar = hedef.Select(h => new ParfumNota { Nota = h.Nota, Katman = h.Katman }).ToList()
                 };
                 db.Parfumler.Add(yeni);

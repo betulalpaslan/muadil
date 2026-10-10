@@ -1,7 +1,7 @@
 namespace Muadil.Infrastructure.IceAktarma;
 
 public record ParfumSatiri(
-    int Satir, string Marka, string Ad, decimal Fiyat50ml,
+    int Satir, string Marka, string Ad,
     IReadOnlyList<string> Ust, IReadOnlyList<string> Orta, IReadOnlyList<string> Alt);
 
 public record MuadilSatiri(

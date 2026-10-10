@@ -37,7 +37,7 @@ public static class SeedData
         }
 
         void ParfumEkle(
-            string ad, Marka marka, decimal fiyat,
+            string ad, Marka marka,
             (string Nota, NotaKatmani Katman)[] parfumNotalari,
             (Marka Marka, string Kod, decimal Fiyat, int Kalicilik, int Benzerlik)[] muadiller)
         {
@@ -45,7 +45,6 @@ public static class SeedData
             {
                 Ad = ad,
                 Marka = marka,
-                Fiyat50ml = fiyat,
                 Notalar = parfumNotalari
                     .Select(n => new ParfumNota { Nota = NotaGetir(n.Nota), Katman = n.Katman })
                     .ToList(),
@@ -70,19 +69,19 @@ public static class SeedData
         var mad = MarkaGetir("Mad", MarkaTuru.Muadil);
         var muscent = MarkaGetir("Muscent", MarkaTuru.Muadil);
 
-        ParfumEkle("Sauvage", dior, 4200,
+        ParfumEkle("Sauvage", dior,
             [("Bergamot", NotaKatmani.Ust), ("Biber", NotaKatmani.Ust),
              ("Lavanta", NotaKatmani.Orta),
              ("Ambroksan", NotaKatmani.Alt), ("Sedir", NotaKatmani.Alt)],
             [(bargello, "ORNEK-1", 650, 8, 9), (mad, "ORNEK-2", 550, 7, 8), (muscent, "ORNEK-3", 600, 9, 8)]);
 
-        ParfumEkle("Bleu de Chanel", chanel, 4500,
+        ParfumEkle("Bleu de Chanel", chanel,
             [("Greyfurt", NotaKatmani.Ust), ("Bergamot", NotaKatmani.Ust),
              ("Yasemin", NotaKatmani.Orta),
              ("Sedir", NotaKatmani.Alt), ("Vetiver", NotaKatmani.Alt)],
             [(bargello, "ORNEK-4", 650, 7, 7)]);
 
-        ParfumEkle("Black Opium", ysl, 4000,
+        ParfumEkle("Black Opium", ysl,
             [("Portakal Çiçeği", NotaKatmani.Ust),
              ("Kahve", NotaKatmani.Orta), ("Yasemin", NotaKatmani.Orta),
              ("Vanilya", NotaKatmani.Alt), ("Paçuli", NotaKatmani.Alt)],

@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiIstek } from "../api/client";
+import { tl } from "../para";
 import type { ParfumListe } from "../types";
 import { HataMesaji } from "./ui";
-
-const tl = (n: number) =>
-  n.toLocaleString("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
 
 export default function Parfumler() {
   const [parfumler, setParfumler] = useState<ParfumListe[]>([]);
@@ -15,14 +13,17 @@ export default function Parfumler() {
   useEffect(() => {
     if (ara.length === 1) return;
     let gecersiz = false;
-    const zamanlayici = setTimeout(() => {
-      const sorgu = ara ? `?ara=${encodeURIComponent(ara)}` : "";
-      apiIstek<ParfumListe[]>(`/api/parfumler${sorgu}`)
-        .then((sonuc) => {
-          if (!gecersiz) setParfumler(sonuc);
-        })
-        .catch((e) => setHata(e.message));
-    }, ara ? 300 : 0);
+    const zamanlayici = setTimeout(
+      () => {
+        const sorgu = ara ? `?ara=${encodeURIComponent(ara)}` : "";
+        apiIstek<ParfumListe[]>(`/api/parfumler${sorgu}`)
+          .then((sonuc) => {
+            if (!gecersiz) setParfumler(sonuc);
+          })
+          .catch((e) => setHata(e.message));
+      },
+      ara ? 300 : 0
+    );
     return () => {
       gecersiz = true;
       clearTimeout(zamanlayici);
@@ -56,7 +57,16 @@ export default function Parfumler() {
                   <span className="block font-baslik text-2xl">{p.ad}</span>
                   <span className="text-sm text-buhar">{p.marka}</span>
                 </span>
-                <span className="shrink-0 tabular-nums">{tl(p.fiyat50ml)}</span>
+                <span className="shrink-0 text-right">
+                  {p.enUygunMuadil !== null ? (
+                    <>
+                      <span className="block tabular-nums">{tl(p.enUygunMuadil)}'den</span>
+                      <span className="text-sm text-buhar">{p.muadilSayisi} muadil</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-buhar">Muadil yok</span>
+                  )}
+                </span>
               </Link>
             </li>
           ))}

@@ -5,18 +5,23 @@ export interface Marka {
   ad: string;
   tur: MarkaTuru;
 }
-export interface Nota{
-    id: number;
-    ad: string;
+
+export interface Nota {
+  id: number;
+  ad: string;
 }
-export type NotaKatmani="Ust" | "Orta" | "Alt";
-export interface ParfumListe{
-    id: number;
-    ad: string;
-    marka: string;
-    fiyat50ml: number;
-    gorselUrl: string | null;
+
+export type NotaKatmani = "Ust" | "Orta" | "Alt";
+
+export interface ParfumListe {
+  id: number;
+  ad: string;
+  marka: string;
+  gorselUrl: string | null;
+  muadilSayisi: number;
+  enUygunMuadil: number | null;
 }
+
 export interface ParfumNota {
   notaId: number;
   notaAd: string;
@@ -38,7 +43,6 @@ export interface ParfumDetayVeri {
   ad: string;
   markaId: number;
   marka: string;
-  fiyat50ml: number;
   gorselUrl: string | null;
   notalar: ParfumNota[];
   muadiller: Muadil[];

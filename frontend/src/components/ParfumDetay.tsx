@@ -4,7 +4,9 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../api/client";
 import { gorselAdresi } from "../gorsel";
+import { tl } from "../para";
 import type { Marka, Muadil, ParfumDetayVeri } from "../types";
+import { ALAN, BUTON, BUTON_SADE, HataMesaji } from "./ui";
 
 type Olcut = "benzerlik" | "fiyat" | "kalicilik";
 
@@ -14,15 +16,12 @@ const OLCUTLER: { deger: Olcut; etiket: string }[] = [
   { deger: "kalicilik", etiket: "En kalıcı" },
 ];
 
-// Piramit: üstte dar, altta geniş. Sınıflar tam yazılmalı (aşağıda neden).
+// Piramit: üstte dar, altta geniş. Sınıflar tam yazılmalı (Tailwind parça birleştirmeyi göremez).
 const PIRAMIT = [
   { katman: "Ust", etiket: "Üst notalar", sinif: "w-3/5 bg-ust" },
   { katman: "Orta", etiket: "Orta notalar", sinif: "w-4/5 bg-orta" },
   { katman: "Alt", etiket: "Alt notalar", sinif: "w-full bg-alt text-cam" },
 ] as const;
-
-const tl = (n: number) =>
-  n.toLocaleString("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
 
 function sirala(liste: Muadil[], olcut: Olcut): Muadil[] {
   return [...liste].sort((a, b) => {
@@ -49,7 +48,6 @@ function Puan({ etiket, deger }: { etiket: string; deger: number }) {
 }
 
 const BOS_FORM = { markaId: "0", kod: "", fiyat: "", urunLinki: "", kalicilikPuani: "5", benzerlikPuani: "5" };
-const ALAN = "w-full rounded-md border border-cizgi bg-white px-3 py-2";
 
 export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
   const { id } = useParams();
@@ -136,7 +134,6 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
   }
 
   const gorsel = gorselAdresi(parfum.gorselUrl);
-  const ucuzlukYuzdesi = (m: Muadil) => Math.round((1 - m.fiyat / parfum.fiyat50ml) * 100);
 
   return (
     <article>
@@ -151,9 +148,6 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
         <div>
           <h1 className="font-baslik text-5xl leading-none">{parfum.ad}</h1>
           <p className="mt-2 text-buhar">{parfum.marka}</p>
-          <p className="mt-2 text-lg tabular-nums">
-            {tl(parfum.fiyat50ml)} <span className="text-sm text-buhar">50 ml</span>
-          </p>
         </div>
       </header>
 
@@ -201,9 +195,6 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
                   </p>
                   <p className="shrink-0 text-lg tabular-nums">{tl(m.fiyat)}</p>
                 </div>
-                {ucuzlukYuzdesi(m) > 0 && (
-                  <p className="text-sm text-buhar">Orijinalden %{ucuzlukYuzdesi(m)} daha uygun</p>
-                )}
                 <div className="mt-3 grid grid-cols-2 gap-4 sm:max-w-sm">
                   <Puan etiket="Benzerlik" deger={m.benzerlikPuani} />
                   <Puan etiket="Kalıcılık" deger={m.kalicilikPuani} />
@@ -218,7 +209,7 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
                     Mağazada gör<span className="sr-only"> (yeni sekmede açılır)</span>
                   </a>
                   {adminMi && (
-                    <button onClick={() => muadilSil(m)} className="text-sm text-buhar hover:text-murekkep">
+                    <button onClick={() => muadilSil(m)} className={BUTON_SADE}>
                       Sil
                     </button>
                   )}
@@ -243,11 +234,13 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
             <select {...alan("markaId")} className={ALAN}>
               <option value="0">Muadil markası seç</option>
               {muadilMarkalar.map((m) => (
-                <option key={m.id} value={m.id}>{m.ad}</option>
+                <option key={m.id} value={m.id}>
+                  {m.ad}
+                </option>
               ))}
             </select>
-            <input {...alan("kod")} placeholder="Kod (ör. 122)" className={ALAN} />
-            <input {...alan("fiyat")} type="number" step="0.01" placeholder="Fiyat" className={ALAN} />
+            <input {...alan("kod")} placeholder="Kod (ör. 567)" className={ALAN} />
+            <input {...alan("fiyat")} type="number" step="0.01" placeholder="Fiyat (50 ml)" className={ALAN} />
             <input {...alan("urunLinki")} type="url" placeholder="https://..." className={ALAN} />
             <label className="text-sm">
               Kalıcılık (1-10)
@@ -257,14 +250,14 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
               Benzerlik (1-10)
               <input {...alan("benzerlikPuani")} type="number" min={1} max={10} className={`${ALAN} mt-1`} />
             </label>
-            <button type="submit" className="rounded-full bg-murekkep px-4 py-2 font-medium text-cam sm:col-span-2">
+            <button type="submit" className={`${BUTON} sm:col-span-2`}>
               Muadili ekle
             </button>
           </form>
         </section>
       )}
 
-      {hata && <p className="mt-4 text-red-700">{hata}</p>}
+      <HataMesaji mesaj={hata} />
     </article>
   );
 }

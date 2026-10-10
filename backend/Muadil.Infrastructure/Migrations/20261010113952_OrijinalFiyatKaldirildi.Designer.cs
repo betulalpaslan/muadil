@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Muadil.Infrastructure.Migrations
 {
     [DbContext(typeof(MuadilDbContext))]
-    [Migration("20261010111622_OrijinalFiyatKaldirildi")]
+    [Migration("20261010113952_OrijinalFiyatKaldirildi")]
     partial class OrijinalFiyatKaldirildi
     {
         /// <inheritdoc />
@@ -91,7 +91,8 @@ namespace Muadil.Infrastructure.Migrations
                     b.HasIndex("ParfumId");
 
                     b.HasIndex("MarkaId", "Kod")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"SilinmeTarihi\" IS NULL");
 
                     b.ToTable("MuadilParfumler", t =>
                         {
@@ -134,10 +135,6 @@ namespace Muadil.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<decimal>("Fiyat50ml")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
 
                     b.Property<string>("GorselUrl")
                         .HasColumnType("text");

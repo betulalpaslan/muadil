@@ -14,8 +14,8 @@ const KATMANLAR = [
 type SeciliNota = { notaId: number; katman: NotaKatmani };
 
 type Props = {
-  parfumId?: number;     // varsa düzenleme, yoksa ekleme
-  onBitti: () => void;   // kaydedilince ya da vazgeçilince
+  parfumId?: number; // varsa düzenleme, yoksa ekleme
+  onBitti: () => void; // kaydedilince ya da vazgeçilince
 };
 
 export default function ParfumFormu({ parfumId, onBitti }: Props) {
@@ -24,7 +24,6 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
   const [notalar, setNotalar] = useState<Nota[]>([]);
   const [ad, setAd] = useState("");
   const [markaId, setMarkaId] = useState(0);
-  const [fiyat, setFiyat] = useState("");
   const [secili, setSecili] = useState<SeciliNota[]>([]);
   const [hata, setHata] = useState("");
   const [gonderiliyor, setGonderiliyor] = useState(false);
@@ -41,7 +40,6 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
         if (p) {
           setAd(p.ad);
           setMarkaId(p.markaId);
-          setFiyat(String(p.fiyat50ml));
           setSecili(p.notalar.map((x) => ({ notaId: x.notaId, katman: x.katman })));
         }
       })
@@ -58,7 +56,7 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
     try {
       await apiIstek(parfumId ? `/api/parfumler/${parfumId}` : "/api/parfumler", token, {
         method: parfumId ? "PUT" : "POST",
-        body: JSON.stringify({ ad, markaId, fiyat50ml: Number(fiyat), notalar: secili }),
+        body: JSON.stringify({ ad, markaId, notalar: secili }),
       });
       onBitti();
     } catch (err) {
@@ -72,23 +70,21 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
     <form onSubmit={kaydet} className="space-y-5 rounded-lg border border-cizgi bg-white p-5">
       <h2 className="font-baslik text-2xl">{parfumId ? "Parfümü düzenle" : "Yeni parfüm"}</h2>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <label className="text-sm sm:col-span-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="text-sm">
           Parfüm adı
           <input value={ad} onChange={(e) => setAd(e.target.value)} required className={`${ALAN} mt-1`} />
         </label>
-        <label className="text-sm sm:col-span-2">
+        <label className="text-sm">
           Marka
           <select value={markaId} onChange={(e) => setMarkaId(Number(e.target.value))} className={`${ALAN} mt-1`}>
             <option value={0}>Seç</option>
             {markalar.map((m) => (
-              <option key={m.id} value={m.id}>{m.ad}</option>
+              <option key={m.id} value={m.id}>
+                {m.ad}
+              </option>
             ))}
           </select>
-        </label>
-        <label className="text-sm">
-          50 ml fiyat (₺)
-          <input type="number" step="0.01" value={fiyat} onChange={(e) => setFiyat(e.target.value)} required className={`${ALAN} mt-1`} />
         </label>
       </div>
 
@@ -121,7 +117,9 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
             >
               <option value="">+ ekle</option>
               {secilebilir.map((n) => (
-                <option key={n.id} value={n.id}>{n.ad}</option>
+                <option key={n.id} value={n.id}>
+                  {n.ad}
+                </option>
               ))}
             </select>
           </div>
@@ -134,7 +132,9 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
         <button type="submit" disabled={gonderiliyor} className={BUTON}>
           {gonderiliyor ? "Kaydediliyor..." : parfumId ? "Değişiklikleri kaydet" : "Parfümü ekle"}
         </button>
-        <button type="button" onClick={onBitti} className={BUTON_SADE}>Vazgeç</button>
+        <button type="button" onClick={onBitti} className={BUTON_SADE}>
+          Vazgeç
+        </button>
       </div>
     </form>
   );
