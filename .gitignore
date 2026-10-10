@@ -483,3 +483,9 @@ $RECYCLE.BIN/
 
 *.env
 *backend/Muadil.Api/uploads/
+
+# Paketler ve yerel veri dosyalari
+/_paketler/
+/*.zip
+/*.xlsx
+/orijinal-fiyat-kaldirma/
