@@ -1,11 +1,13 @@
 import { Link, useSearchParams } from "react-router-dom";
-import SozlukYonetimi from "./SozlukYonetimi";
 import ParfumYonetimi from "./ParfumYonetimi";
+import SozlukYonetimi from "./SozlukYonetimi";
+import TopluYukleme from "./TopluYukleme";
 
 const SEKMELER = [
   { id: "parfumler", etiket: "Parfümler" },
   { id: "markalar", etiket: "Markalar" },
   { id: "notalar", etiket: "Notalar" },
+  { id: "toplu", etiket: "Toplu yükleme" },
 ] as const;
 
 export default function AdminSayfasi() {
@@ -16,13 +18,13 @@ export default function AdminSayfasi() {
     <div>
       <h1 className="font-baslik text-4xl">Yönetim</h1>
 
-      <nav aria-label="Yönetim bölümleri" className="mt-6 flex gap-6 border-b border-cizgi">
+      <nav aria-label="Yönetim bölümleri" className="mt-6 flex gap-6 overflow-x-auto border-b border-cizgi">
         {SEKMELER.map((s) => (
           <Link
             key={s.id}
             to={{ search: `?sekme=${s.id}` }}
             aria-current={sekme === s.id ? "page" : undefined}
-            className={`-mb-px border-b-2 pb-2 text-sm ${
+            className={`-mb-px shrink-0 border-b-2 pb-2 text-sm ${
               sekme === s.id ? "border-murekkep font-medium" : "border-transparent text-buhar hover:text-murekkep"
             }`}
           >
@@ -35,6 +37,7 @@ export default function AdminSayfasi() {
         {sekme === "parfumler" && <ParfumYonetimi />}
         {sekme === "markalar" && <SozlukYonetimi uc="/api/markalar" tekil="marka" turlu />}
         {sekme === "notalar" && <SozlukYonetimi uc="/api/notalar" tekil="nota" />}
+        {sekme === "toplu" && <TopluYukleme />}
       </div>
     </div>
   );

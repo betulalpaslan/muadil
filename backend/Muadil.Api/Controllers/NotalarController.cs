@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Muadil.Api.Dtos;
 using Muadil.Domain.Entities;
+using Muadil.Domain.Kurallar;
 using Muadil.Infrastructure.Persistence;
 
 namespace Muadil.Api.Controllers;
@@ -22,7 +23,7 @@ public class NotalarController(MuadilDbContext db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<NotaDto>> Ekle(NotaKaydetDto dto)
     {
-        var ad = Normalize(dto.Ad);
+        var ad = NotaAdi.Normalize(dto.Ad);
         if (await AdKullaniliyor(ad))
             return Conflict(new { mesaj = $"'{ad}' notası zaten var." });
 
@@ -39,19 +40,13 @@ public class NotalarController(MuadilDbContext db) : ControllerBase
         var nota = await db.Notalar.FindAsync(id);
         if (nota is null) return NotFound();
 
-        var ad = Normalize(dto.Ad);
+        var ad = NotaAdi.Normalize(dto.Ad);
         if (await AdKullaniliyor(ad, id))
             return Conflict(new { mesaj = $"'{ad}' notası zaten var." });
 
         nota.Ad = ad;
         await db.SaveChangesAsync();
         return NoContent();
-    }
-
-    private static string Normalize(string ad)
-    {
-        var temiz = ad.Trim();
-        return char.ToUpper(temiz[0], new System.Globalization.CultureInfo("tr-TR")) + temiz[1..].ToLower(new System.Globalization.CultureInfo("tr-TR"));
     }
 
     private Task<bool> AdKullaniliyor(string ad, int? haricId = null) =>

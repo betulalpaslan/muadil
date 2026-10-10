@@ -1,26 +1,31 @@
-using Microsoft.EntityFrameworkCore;
-using Muadil.Infrastructure.Persistence;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Muadil.Api.Auth;
-using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Muadil.Api.Auth;
 using Muadil.Domain.Abstractions;
+using Muadil.Infrastructure.IceAktarma;
+using Muadil.Infrastructure.Persistence;
 using Muadil.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- Servis kaydı ---
 
-// Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddOpenApi();
+
 builder.Services.AddDbContext<MuadilDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Muadil")));
-    var uploadsYolu = Path.Combine(builder.Environment.ContentRootPath, "uploads");
-builder.Services.AddSingleton<IGorselDeposu>(new DiskGorselDeposu(uploadsYolu, "/uploads"));
 
-    builder.Services
+var uploadsYolu = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+builder.Services.AddSingleton<IGorselDeposu>(new DiskGorselDeposu(uploadsYolu, "/uploads"));
+builder.Services.AddScoped<IceAktarmaServisi>();
+
+builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -38,30 +43,30 @@ builder.Services.AddCors(options =>
         .WithOrigins(builder.Configuration["Cors:FrontendUrl"]!)
         .AllowAnyHeader()
         .AllowAnyMethod()));
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// --- İstek boru hattı ---
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<MuadilDbContext>();
+    await SeedData.LoadAsync(db);
+}
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsYolu),
     RequestPath = "/uploads"
 });
 
-// Configure the HTTP request pipeline.
-
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<MuadilDbContext>();
-    await SeedData.LoadAsync(db);
-}
 app.UseHttpsRedirection();
-
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllers();
 
