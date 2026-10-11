@@ -28,6 +28,7 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
         modelBuilder.Entity<Parfum>(e =>
         {
             e.Property(x => x.Ad).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Cinsiyet).HasDefaultValue(Cinsiyet.Unisex);
             e.HasOne(x => x.Marka).WithMany()
                 .HasForeignKey(x => x.MarkaId)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -37,6 +38,7 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
         modelBuilder.Entity<MuadilParfum>(e =>
         {
             e.Property(x => x.Kod).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Cinsiyet).HasDefaultValue(Cinsiyet.Unisex);
             e.Property(x => x.UrunLinki).HasMaxLength(500).IsRequired();
             e.Property(x => x.Fiyat).HasPrecision(10, 2);
             e.HasOne(x => x.Parfum).WithMany(p => p.Muadiller)
@@ -45,7 +47,8 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
             e.HasOne(x => x.Marka).WithMany()
                 .HasForeignKey(x => x.MarkaId)
                 .OnDelete(DeleteBehavior.Restrict);
-            e.HasIndex(x => new { x.MarkaId, x.Kod }).IsUnique()
+            // Aynı marka aynı kodu kadın/erkek için ayrı ayrı kullanabilir (ör. Mad A114); cinsiyet de anahtarın parçası
+            e.HasIndex(x => new { x.MarkaId, x.Kod, x.Cinsiyet }).IsUnique()
                 .HasFilter("\"SilinmeTarihi\" IS NULL");
             e.HasQueryFilter(x => x.SilinmeTarihi == null && x.Parfum.SilinmeTarihi == null);
             e.ToTable(t =>

@@ -4,6 +4,7 @@ public class MuadilParfum
 {
     public int Id { get; set; }
     public string Kod { get; set; } = string.Empty;
+    public Cinsiyet Cinsiyet { get; set; } = Cinsiyet.Unisex;
     public decimal Fiyat { get; set; }
     public string UrunLinki { get; set; } = string.Empty;
     public int KalicilikPuani { get; set; }

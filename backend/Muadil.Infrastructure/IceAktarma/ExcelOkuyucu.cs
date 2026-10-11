@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
+using Muadil.Domain.Entities;
 using Muadil.Domain.Kurallar;
 
 namespace Muadil.Infrastructure.IceAktarma;
@@ -67,6 +68,7 @@ public static class ExcelOkuyucu
             var orta = Notalar(Hucre(4));
             var alt = Notalar(Hucre(5));
             var hepsi = ust.Concat(orta).Concat(alt).ToList();
+            var cinsiyet = CinsiyetAyristir(Hucre(6), out var cinsiyetHata);
 
             if (marka == "") hatalar.Add("Marka boş.");
             else if (marka.Length > 100) hatalar.Add("Marka adı en fazla 100 karakter olabilir.");
@@ -74,6 +76,7 @@ public static class ExcelOkuyucu
             else if (ad.Length > 200) hatalar.Add("Parfüm adı en fazla 200 karakter olabilir.");
             if (hepsi.Count == 0) hatalar.Add("En az bir nota girilmeli.");
             if (hepsi.Any(n => n.Length > 100)) hatalar.Add("Nota adları en fazla 100 karakter olabilir.");
+            if (cinsiyetHata is not null) hatalar.Add(cinsiyetHata);
 
             var tekrarlar = hepsi.GroupBy(n => n, Metin.TrKarsilastirici).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
             if (tekrarlar.Count > 0) hatalar.Add($"Aynı nota birden fazla katmanda: {string.Join(", ", tekrarlar)}.");
@@ -81,7 +84,7 @@ public static class ExcelOkuyucu
             if (hatalar.Count > 0)
                 sonuc.Hatalar.AddRange(hatalar.Select(h => new SatirHatasi(ParfumSayfasi, satir.RowNumber(), h)));
             else
-                sonuc.Parfumler.Add(new ParfumSatiri(satir.RowNumber(), marka, ad, ust, orta, alt));
+                sonuc.Parfumler.Add(new ParfumSatiri(satir.RowNumber(), marka, ad, cinsiyet, ust, orta, alt));
         }
     }
 
@@ -101,6 +104,7 @@ public static class ExcelOkuyucu
             var kalicilik = Tamsayi(satir.Cell(6));
             var benzerlik = Tamsayi(satir.Cell(7));
             var link = Hucre(8);
+            var cinsiyet = CinsiyetAyristir(Hucre(9), out var cinsiyetHata);
 
             if (orijinalMarka == "") hatalar.Add("Orijinal marka boş.");
             if (parfum == "") hatalar.Add("Parfüm adı boş.");
@@ -112,12 +116,13 @@ public static class ExcelOkuyucu
             if (kalicilik is null or < 1 or > 10) hatalar.Add("Kalıcılık 1 ile 10 arasında bir tam sayı olmalı.");
             if (benzerlik is null or < 1 or > 10) hatalar.Add("Benzerlik 1 ile 10 arasında bir tam sayı olmalı.");
             if (!GecerliLink(link)) hatalar.Add("Ürün linki https:// ile başlayan geçerli bir adres olmalı.");
+            if (cinsiyetHata is not null) hatalar.Add(cinsiyetHata);
 
             if (hatalar.Count > 0)
                 sonuc.Hatalar.AddRange(hatalar.Select(h => new SatirHatasi(MuadilSayfasi, satir.RowNumber(), h)));
             else
                 sonuc.Muadiller.Add(new MuadilSatiri(
-                    satir.RowNumber(), orijinalMarka, parfum, muadilMarka, kod,
+                    satir.RowNumber(), orijinalMarka, parfum, muadilMarka, kod, cinsiyet,
                     fiyat!.Value, kalicilik!.Value, benzerlik!.Value, link));
         }
     }
@@ -137,6 +142,14 @@ public static class ExcelOkuyucu
         var metin = hucre.GetString().Replace("₺", "").Replace("TL", "", StringComparison.OrdinalIgnoreCase).Trim();
         if (!FiyatDeseni.IsMatch(metin)) return null;
         return decimal.Parse(metin.Replace(',', '.'), CultureInfo.InvariantCulture);
+    }
+
+    private static Cinsiyet CinsiyetAyristir(string metin, out string? hata)
+    {
+        hata = CinsiyetAdi.TryAyristir(metin, out var cinsiyet)
+            ? null
+            : "Cinsiyet \"Kadın\", \"Erkek\" ya da \"Unisex\" olmalı (boş bırakılırsa Unisex sayılır).";
+        return cinsiyet;
     }
 
     private static int? Tamsayi(IXLCell hucre)

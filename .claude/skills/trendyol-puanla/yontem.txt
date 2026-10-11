@@ -1,0 +1,40 @@
+<MARKA> muadilleri — Trendyol yorumlarından puan önerisi (<AY YIL>)
+Bu dosyadaki kodlar ve puanlar ÖNERİDİR; veritabanına yazılmadı. "Muadiller" sayfası şablon biçimindedir; onayladığın satırları yönetim sayfasındaki toplu yüklemeyle içe aktarabilirsin (yalnız ilk 9 sütun okunur, gri başlıklı kanıt sütunları yok sayılır).
+"Eksik kanıt" sayfası: en az bir puan için yeterli yorum bulunamayan ya da Trendyol'da ilanı olmayan muadiller. Bu satırlar "yetersiz" yazdığı için olduğu gibi içe aktarılamaz.
+"Durum" sütunu: "mevcut" = veritabanında zaten var, yüklenirse puan/link/fiyat güncellenir; "yeni" = yüklenirse eklenir. Toplu yükleme satırı muadil marka + kod + cinsiyet ile bulur (Cinsiyet sütunu boşsa Unisex sayılır); yeni marka gerekirse kendiliğinden oluşturulur.
+
+1) Kod eşleştirme
+- <Kodların nereden geldiğini yaz: markanın kendi sitesi, üçüncü taraf listeler, kullanıcının verdiği liste, nota karşılaştırması.>
+- Doğrulama: Trendyol yorumlarında orijinal parfümün adının kaç yorumda geçtiği sayıldı.
+- <Aynı kod hem kadın hem erkek üründe kullanılıyorsa ve veritabanındaki kodla çakışıyorsa koda " E" / " K" eklendiğini yaz.>
+
+2) Ürün (ilan) seçimi
+- Trendyol'da markanın resmi mağazasının 50 ml tekli ilanı (2'li, set, vücut spreyi ilanları hariç); birden fazlaysa en çok değerlendirmeli olan.
+- Link sütunu seçilen ilanın gerçek ürün sayfasıdır (-p-<id>). 50 ml ilanı yoksa aynı kodun başka boy ilanı ya da markanın kendi sitesindeki ürün sayfası ("Not" sütununda yazıyor).
+- Yorum bir puan için yetmezse aynı ürünün ek ilanının (başka boy ya da bayi) yorumları da sayıldı ("Not" sütununda yazıyor).
+
+3) Yorumların toplanması
+- Trendyol'un yorum sayfasının kullandığı veri isteğiyle, istek başına 2,5–3,5 sn arayla okundu.
+- 2000'den fazla yazılı yorumu olan ürünlerde en yeni 2000 yorum okundu ("Okunan yorum" sütununda tarih var).
+- Yıldız ortalaması ve değerlendirme sayısı bilgi içindir; puana katılmadı.
+
+4) Sınıflama (otomatik, kurallı)
+- Kalıcılık: "kalıcı", "kalıcılığı …", "uçuyor", "kalmıyor", "gün boyu", "akşama kadar", "X saat", "X dakika" gibi ifadeler.
+  Olumsuz: "kalıcı değil", "kalıcılığı yok/az/sıfır", "uçuyor", "hemen gidiyor", ≤3 saat, "su gibi" …
+  Orta: "kalıcılığı orta/normal/idare eder", "kısmen kalıcı", "biraz daha kalıcı olsa", 4 saat …
+  Olumlu: "çok kalıcı", "kalıcılığı iyi/harika", "gün boyu", "akşama kadar", ≥5 saat …
+  Aynı yorumda hem olumlu hem olumsuz ifade varsa "orta" sayıldı. "Umarım kalıcıdır", "henüz denemedim" gibi yorumlar sayılmadı.
+- Benzerlik: yalnız orijinale (orijinal/orjinal, parfüm ya da marka adı, "muadil") atıf yapan yorumlar.
+  Olumlu: "birebir", "aynısı", "tıpatıp", "orijinaline çok yakın", "benziyor", "farkı yok" …
+  Olumsuz: "benzemiyor", "alakası yok", "aynı değil", "uzaktan yakından", "<parfüm adı> değil" …
+  "Erkek parfümüne benziyor", "fotoğraftakinin aynısı geldi", "yanlış ürün geldi", "eskisi gibi değil" gibi orijinalle ilgisi olmayan ifadeler hariç.
+- Kurallar Bargello puanlamasıyla (Ekim 2026) aynıdır; sonuçlar markalar arasında karşılaştırılabilir.
+
+5) Puan
+- Puan = 1 + 9 × (olumlu + 0,5 × orta) / (olumlu + orta + olumsuz), en yakın tam sayıya yuvarlanır.
+- İlgili yorum sayısı 5'in altındaysa puan önerilmez ("yetersiz"). 5–7 ilgili yoruma dayanan puanların dayanağında "Az kanıt" yazar. Eşik üç markada (Bargello, Mad, Muscent) aynıdır; Ekim 2026'da 8'den 5'e indirildi.
+- Çapraz kontrol: Trendyol'un kendi konu analizindeki "Kalıcılık" olumlu/olumsuz sayıları ayrı sütunda (puana katılmadı).
+
+6) Bilinen sınırlamalar
+- Memnun olmayanlar kalıcılıktan daha sık söz ediyor; puanlar orta bölgede (4–8) toplanma eğiliminde. Mutlak değerden çok muadiller arası sıralama olarak okunmalı.
+- Kurallı sınıflama ironi, uzun/çok konulu yorumlar ve yazım hatalarında yanılabilir; dayanak sütunundaki örnekler kontrol içindir.

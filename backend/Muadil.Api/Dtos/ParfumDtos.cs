@@ -11,7 +11,7 @@ public record ParfumListeDto(
 public record ParfumNotaDto(int NotaId, string NotaAd, NotaKatmani Katman);
 
 public record ParfumDetayDto(
-    int Id, string Ad, int MarkaId, string Marka, string? GorselUrl,
+    int Id, string Ad, Cinsiyet Cinsiyet, int MarkaId, string Marka, string? GorselUrl,
     List<ParfumNotaDto> Notalar, List<MuadilDto> Muadiller);
 
 // Yazma
@@ -22,4 +22,5 @@ public record ParfumNotaKaydetDto(
 public record ParfumKaydetDto(
     [Required, MaxLength(200)] string Ad,
     [Range(1, int.MaxValue)] int MarkaId,
-    [Required, MinLength(1)] List<ParfumNotaKaydetDto> Notalar);
+    [Required, MinLength(1)] List<ParfumNotaKaydetDto> Notalar,
+    [EnumDataType(typeof(Cinsiyet))] Cinsiyet Cinsiyet = Cinsiyet.Unisex);

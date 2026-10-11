@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../../api/client";
-import type { Marka, Nota, NotaKatmani, ParfumDetayVeri } from "../../types";
+import type { Cinsiyet, Marka, Nota, NotaKatmani, ParfumDetayVeri } from "../../types";
 import { ALAN, BUTON, BUTON_SADE, HataMesaji } from "../ui";
 
 const KATMANLAR = [
@@ -10,6 +10,12 @@ const KATMANLAR = [
   { deger: "Orta", etiket: "Orta notalar", renk: "bg-orta" },
   { deger: "Alt", etiket: "Alt notalar", renk: "bg-alt text-cam" },
 ] as const;
+
+const CINSIYETLER: { deger: Cinsiyet; etiket: string }[] = [
+  { deger: "Unisex", etiket: "Unisex" },
+  { deger: "Kadin", etiket: "Kadın" },
+  { deger: "Erkek", etiket: "Erkek" },
+];
 
 type SeciliNota = { notaId: number; katman: NotaKatmani };
 
@@ -24,6 +30,7 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
   const [notalar, setNotalar] = useState<Nota[]>([]);
   const [ad, setAd] = useState("");
   const [markaId, setMarkaId] = useState(0);
+  const [cinsiyet, setCinsiyet] = useState<Cinsiyet>("Unisex");
   const [secili, setSecili] = useState<SeciliNota[]>([]);
   const [hata, setHata] = useState("");
   const [gonderiliyor, setGonderiliyor] = useState(false);
@@ -40,6 +47,7 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
         if (p) {
           setAd(p.ad);
           setMarkaId(p.markaId);
+          setCinsiyet(p.cinsiyet);
           setSecili(p.notalar.map((x) => ({ notaId: x.notaId, katman: x.katman })));
         }
       })
@@ -56,7 +64,7 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
     try {
       await apiIstek(parfumId ? `/api/parfumler/${parfumId}` : "/api/parfumler", token, {
         method: parfumId ? "PUT" : "POST",
-        body: JSON.stringify({ ad, markaId, notalar: secili }),
+        body: JSON.stringify({ ad, markaId, cinsiyet, notalar: secili }),
       });
       onBitti();
     } catch (err) {
@@ -82,6 +90,16 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
             {markalar.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.ad}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-sm">
+          Cinsiyet
+          <select value={cinsiyet} onChange={(e) => setCinsiyet(e.target.value as Cinsiyet)} className={`${ALAN} mt-1`}>
+            {CINSIYETLER.map((c) => (
+              <option key={c.deger} value={c.deger}>
+                {c.etiket}
               </option>
             ))}
           </select>

@@ -1,12 +1,14 @@
+using Muadil.Domain.Entities;
+
 namespace Muadil.Infrastructure.IceAktarma;
 
 public record ParfumSatiri(
-    int Satir, string Marka, string Ad,
+    int Satir, string Marka, string Ad, Cinsiyet Cinsiyet,
     IReadOnlyList<string> Ust, IReadOnlyList<string> Orta, IReadOnlyList<string> Alt);
 
 public record MuadilSatiri(
     int Satir, string OrijinalMarka, string Parfum, string MuadilMarka,
-    string Kod, decimal Fiyat, int Kalicilik, int Benzerlik, string UrunLinki);
+    string Kod, Cinsiyet Cinsiyet, decimal Fiyat, int Kalicilik, int Benzerlik, string UrunLinki);
 
 public record SatirHatasi(string Sayfa, int Satir, string Mesaj);
 

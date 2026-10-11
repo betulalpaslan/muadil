@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using ModelContextProtocol.Server;
+using Muadil.Domain.Entities;
 using Muadil.Domain.Kurallar;
 using Muadil.Infrastructure.IceAktarma;
 using Muadil.Infrastructure.Persistence;
@@ -67,10 +68,11 @@ public static class MuadilAraclari
             {
                 Parfum = p.Ad,
                 Marka = p.Marka.Ad,
+                Cinsiyet = p.Cinsiyet,
                 Notalar = p.Notalar.OrderBy(n => n.Katman).ThenBy(n => n.Nota.Ad)
                     .Select(n => new { Nota = n.Nota.Ad, n.Katman }).ToList(),
                 Muadiller = p.Muadiller.OrderByDescending(m => m.BenzerlikPuani).ThenBy(m => m.Fiyat)
-                    .Select(m => new { Marka = m.Marka.Ad, m.Kod, m.Fiyat, Kalicilik = m.KalicilikPuani, Benzerlik = m.BenzerlikPuani, Link = m.UrunLinki })
+                    .Select(m => new { Marka = m.Marka.Ad, m.Kod, Cinsiyet = m.Cinsiyet, m.Fiyat, Kalicilik = m.KalicilikPuani, Benzerlik = m.BenzerlikPuani, Link = m.UrunLinki })
                     .ToList()
             })
             .FirstOrDefaultAsync(ct);
@@ -96,6 +98,7 @@ public static class MuadilAraclari
             .Select(m => new
             {
                 Muadil = m.Marka.Ad + " " + m.Kod,
+                Cinsiyet = m.Cinsiyet,
                 Orijinal = m.Parfum.Marka.Ad + " " + m.Parfum.Ad,
                 m.Fiyat,
                 Kalicilik = m.KalicilikPuani,
@@ -109,18 +112,20 @@ public static class MuadilAraclari
     // ---------- Yazma (yalnızca kullanıcı açıkça istediğinde) ----------
 
     [McpServerTool(Name = "muadil_guncelle", Destructive = false, Idempotent = true)]
-    [Description("Var olan bir muadilin kalıcılık puanını, benzerlik puanını, 50 ml fiyatını ya da ürün linkini günceller; yalnızca verilen alanlar değişir. Puanlar editörün kararıdır: kullanıcı söylemediği bir puanı önerme, tahmin etme ya da uydurma.")]
+    [Description("Var olan bir muadilin kalıcılık puanını, benzerlik puanını, 50 ml fiyatını, ürün linkini ya da cinsiyetini günceller; yalnızca verilen alanlar değişir. Aynı marka+kod bir kadın bir erkek üründe tekrar kullanılıyorsa 'cinsiyet' ile hangisini kastettiğini belirt. Puanlar editörün kararıdır: kullanıcı söylemediği bir puanı önerme, tahmin etme ya da uydurma.")]
     public static async Task<string> MuadilGuncelle(
         MuadilDbContext db,
         [Description("Muadil markası, ör. 'Bargello'")] string muadilMarka,
         [Description("Muadil kodu, ör. '567'")] string kod,
+        [Description("Güncellenecek satırın cinsiyeti: 'Kadın', 'Erkek' ya da 'Unisex'. Aynı marka+kodda tek satır varsa boş bırakılabilir.")] string? cinsiyet = null,
         [Description("Yeni kalıcılık puanı, 1-10 arası tam sayı")] int? kalicilik = null,
         [Description("Yeni benzerlik puanı, 1-10 arası tam sayı")] int? benzerlik = null,
         [Description("Yeni 50 ml fiyatı (TL)")] decimal? fiyat = null,
         [Description("Yeni ürün linki, https:// ile başlamalı")] string? urunLinki = null,
+        [Description("Satırın cinsiyetini değiştirir (nadiren gerekir): 'Kadın', 'Erkek' ya da 'Unisex'.")] string? yeniCinsiyet = null,
         CancellationToken ct = default)
     {
-        if (kalicilik is null && benzerlik is null && fiyat is null && urunLinki is null)
+        if (kalicilik is null && benzerlik is null && fiyat is null && urunLinki is null && yeniCinsiyet is null)
             return "Değiştirilecek bir alan verilmedi.";
 
         var hatalar = new List<string>();
@@ -128,27 +133,57 @@ public static class MuadilAraclari
         if (benzerlik is < 1 or > 10) hatalar.Add("Benzerlik 1-10 arası olmalı.");
         if (fiyat is < 1m or > 100000m) hatalar.Add("Fiyat 1-100000 arası olmalı.");
         if (urunLinki is not null && !GecerliLink(urunLinki)) hatalar.Add("Link https:// ile başlayan geçerli bir adres olmalı.");
+        if (cinsiyet is not null && !CinsiyetAdi.TryAyristir(cinsiyet, out _)) hatalar.Add("Cinsiyet 'Kadın', 'Erkek' ya da 'Unisex' olmalı.");
+        Cinsiyet? yeniCinsiyetDeger = null;
+        if (yeniCinsiyet is not null)
+        {
+            if (!CinsiyetAdi.TryAyristir(yeniCinsiyet, out var ayristirilan)) hatalar.Add("Yeni cinsiyet 'Kadın', 'Erkek' ya da 'Unisex' olmalı.");
+            else yeniCinsiyetDeger = ayristirilan;
+        }
         if (hatalar.Count > 0) return "Güncellenmedi: " + string.Join(" ", hatalar);
 
-        var muadil = await db.MuadilParfumler
+        var adaylar = await db.MuadilParfumler
             .Include(m => m.Marka)
             .Include(m => m.Parfum).ThenInclude(p => p.Marka)
-            .FirstOrDefaultAsync(m => EF.Functions.ILike(m.Marka.Ad, muadilMarka.Trim()) && EF.Functions.ILike(m.Kod, kod.Trim()), ct);
+            .Where(m => EF.Functions.ILike(m.Marka.Ad, muadilMarka.Trim()) && EF.Functions.ILike(m.Kod, kod.Trim()))
+            .ToListAsync(ct);
+
+        MuadilParfum? muadil;
+        if (cinsiyet is not null)
+        {
+            CinsiyetAdi.TryAyristir(cinsiyet, out var cinsiyetDeger);
+            muadil = adaylar.FirstOrDefault(m => m.Cinsiyet == cinsiyetDeger);
+        }
+        else if (adaylar.Count > 1)
+            return $"'{muadilMarka} {kod}' kodunda birden fazla satır var ({string.Join(", ", adaylar.Select(m => m.Cinsiyet))}). 'cinsiyet' belirt.";
+        else
+            muadil = adaylar.FirstOrDefault();
+
         if (muadil is null)
-            return $"'{muadilMarka} {kod}' bulunamadı. muadilleri_listele ile kontrol et.";
+            return $"'{muadilMarka} {kod}'" + (cinsiyet is not null ? $" ({cinsiyet})" : "") +
+                   $" bulunamadı.{(adaylar.Count > 0 ? $" Bu kodda var olan cinsiyetler: {string.Join(", ", adaylar.Select(m => m.Cinsiyet))}." : "")} muadilleri_listele ile kontrol et.";
 
         if (kalicilik is not null) muadil.KalicilikPuani = kalicilik.Value;
         if (benzerlik is not null) muadil.BenzerlikPuani = benzerlik.Value;
         if (fiyat is not null) muadil.Fiyat = fiyat.Value;
         if (urunLinki is not null) muadil.UrunLinki = urunLinki.Trim();
-        await db.SaveChangesAsync(ct);
+        if (yeniCinsiyetDeger is not null) muadil.Cinsiyet = yeniCinsiyetDeger.Value;
 
-        return $"Güncellendi: {muadil.Marka.Ad} {muadil.Kod} ({muadil.Parfum.Marka.Ad} {muadil.Parfum.Ad}) → " +
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            return $"Güncellenmedi: {muadil.Marka.Ad} {muadil.Kod} ({yeniCinsiyetDeger}) zaten var.";
+        }
+
+        return $"Güncellendi: {muadil.Marka.Ad} {muadil.Kod} ({muadil.Cinsiyet}, {muadil.Parfum.Marka.Ad} {muadil.Parfum.Ad}) → " +
                $"kalıcılık {muadil.KalicilikPuani}, benzerlik {muadil.BenzerlikPuani}, fiyat {muadil.Fiyat} TL.";
     }
 
     [McpServerTool(Name = "muadil_ekle", Destructive = false, Idempotent = true)]
-    [Description("Bir orijinal parfüme muadil ekler. Aynı muadil markası ve kodu zaten varsa bilgilerini günceller. Muadil markası sistemde yoksa oluşturulur. Puanlar editörün kararıdır: kullanıcı vermediyse sor, uydurma.")]
+    [Description("Bir orijinal parfüme muadil ekler. Aynı muadil markası, kodu ve cinsiyeti zaten varsa bilgilerini günceller. Muadil markası sistemde yoksa oluşturulur. Bir marka aynı kodu kadın ve erkek üründe ayrı ayrı kullanıyorsa iki kez (cinsiyet farklı) eklenebilir. Puanlar editörün kararıdır: kullanıcı vermediyse sor, uydurma.")]
     public static async Task<string> MuadilEkle(
         IceAktarmaServisi servis,
         [Description("Orijinal parfümün markası, ör. 'Dior'")] string orijinalMarka,
@@ -159,7 +194,8 @@ public static class MuadilAraclari
         [Description("Kalıcılık puanı, 1-10")] int kalicilik,
         [Description("Benzerlik puanı, 1-10")] int benzerlik,
         [Description("Ürün linki, https:// ile başlamalı")] string urunLinki,
-        CancellationToken ct)
+        [Description("Cinsiyet: 'Kadın', 'Erkek' ya da 'Unisex' (varsayılan). Markanın aynı kodu iki cinsiyette ayrı ürün için kullandığı durumlar dışında boş bırak.")] string cinsiyet = "Unisex",
+        CancellationToken ct = default)
     {
         var hatalar = new List<string>();
         if (string.IsNullOrWhiteSpace(kod) || kod.Trim().Length > 50) hatalar.Add("Kod boş olamaz, en fazla 50 karakter.");
@@ -167,21 +203,22 @@ public static class MuadilAraclari
         if (kalicilik is < 1 or > 10) hatalar.Add("Kalıcılık 1-10 arası olmalı.");
         if (benzerlik is < 1 or > 10) hatalar.Add("Benzerlik 1-10 arası olmalı.");
         if (!GecerliLink(urunLinki)) hatalar.Add("Link https:// ile başlayan geçerli bir adres olmalı.");
+        if (!CinsiyetAdi.TryAyristir(cinsiyet, out var cinsiyetDeger)) hatalar.Add("Cinsiyet 'Kadın', 'Erkek' ya da 'Unisex' olmalı.");
         if (hatalar.Count > 0) return "Eklenmedi: " + string.Join(" ", hatalar);
 
-        var satir = new MuadilSatiri(0, orijinalMarka.Trim(), parfum.Trim(), muadilMarka.Trim(), kod.Trim(),
+        var satir = new MuadilSatiri(0, orijinalMarka.Trim(), parfum.Trim(), muadilMarka.Trim(), kod.Trim(), cinsiyetDeger,
             fiyat, kalicilik, benzerlik, urunLinki.Trim());
         var sonuc = await servis.UygulaAsync([], [satir], kaydet: true, ct);
 
         return sonuc.Ozet is null
             ? "Eklenmedi: " + string.Join(" ", sonuc.Hatalar.Select(h => h.Mesaj))
             : sonuc.Ozet.YeniMuadil > 0
-                ? $"Eklendi: {muadilMarka} {kod} → {orijinalMarka} {parfum}." + YeniMarkaNotu(sonuc.Ozet)
-                : $"Zaten vardı, güncellendi: {muadilMarka} {kod}.";
+                ? $"Eklendi: {muadilMarka} {kod} ({cinsiyetDeger}) → {orijinalMarka} {parfum}." + YeniMarkaNotu(sonuc.Ozet)
+                : $"Zaten vardı, güncellendi: {muadilMarka} {kod} ({cinsiyetDeger}).";
     }
 
     [McpServerTool(Name = "parfum_ekle", Destructive = false, Idempotent = true)]
-    [Description("Orijinal parfüm ekler ya da var olanın nota piramidini değiştirir. Notalar virgülle ayrılır. Sistemde olmayan marka ve notalar oluşturulur; sonuçta yeni nota adları listelenir, yazım hatası olup olmadığını kullanıcıya göster. Nota bilgisi doğrulanmamışsa önce kullanıcıya onaylat.")]
+    [Description("Orijinal parfüm ekler ya da var olanın nota piramidini ve cinsiyetini değiştirir. Notalar virgülle ayrılır. Sistemde olmayan marka ve notalar oluşturulur; sonuçta yeni nota adları listelenir, yazım hatası olup olmadığını kullanıcıya göster. Nota bilgisi doğrulanmamışsa önce kullanıcıya onaylat.")]
     public static async Task<string> ParfumEkle(
         IceAktarmaServisi servis,
         [Description("Orijinal marka, ör. 'Dior'")] string marka,
@@ -189,7 +226,8 @@ public static class MuadilAraclari
         [Description("Üst notalar, virgülle: 'Bergamot, Biber'")] string ustNotalar,
         [Description("Orta notalar, virgülle")] string ortaNotalar,
         [Description("Alt notalar, virgülle")] string altNotalar,
-        CancellationToken ct)
+        [Description("Cinsiyet: 'Kadın', 'Erkek' ya da 'Unisex' (varsayılan)")] string cinsiyet = "Unisex",
+        CancellationToken ct = default)
     {
         var ust = Notalar(ustNotalar);
         var orta = Notalar(ortaNotalar);
@@ -203,8 +241,10 @@ public static class MuadilAraclari
         var tekrar = hepsi.GroupBy(n => n, Metin.TrKarsilastirici).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
         if (tekrar.Count > 0)
             return $"Eklenmedi: aynı nota birden fazla katmanda: {string.Join(", ", tekrar)}.";
+        if (!CinsiyetAdi.TryAyristir(cinsiyet, out var cinsiyetDeger))
+            return "Eklenmedi: cinsiyet 'Kadın', 'Erkek' ya da 'Unisex' olmalı.";
 
-        var satir = new ParfumSatiri(0, marka.Trim(), parfum.Trim(), ust, orta, alt);
+        var satir = new ParfumSatiri(0, marka.Trim(), parfum.Trim(), cinsiyetDeger, ust, orta, alt);
         var sonuc = await servis.UygulaAsync([satir], [], kaydet: true, ct);
 
         if (sonuc.Ozet is null)

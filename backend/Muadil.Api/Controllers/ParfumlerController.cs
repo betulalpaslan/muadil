@@ -43,14 +43,14 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
         var parfum = await db.Parfumler.AsNoTracking()
             .Where(p => p.Id == id)
             .Select(p => new ParfumDetayDto(
-                p.Id, p.Ad, p.MarkaId, p.Marka.Ad, p.GorselUrl,
+                p.Id, p.Ad, p.Cinsiyet, p.MarkaId, p.Marka.Ad, p.GorselUrl,
                 p.Notalar
                     .OrderBy(pn => pn.Katman).ThenBy(pn => pn.Nota.Ad)
                     .Select(pn => new ParfumNotaDto(pn.NotaId, pn.Nota.Ad, pn.Katman))
                     .ToList(),
                 p.Muadiller
                     .OrderByDescending(m => m.BenzerlikPuani).ThenBy(m => m.Fiyat)
-                    .Select(m => new MuadilDto(m.Id, m.Marka.Ad, m.Kod, m.Fiyat,
+                    .Select(m => new MuadilDto(m.Id, m.Marka.Ad, m.Kod, m.Cinsiyet, m.Fiyat,
                         m.KalicilikPuani, m.BenzerlikPuani, m.UrunLinki))
                     .ToList()))
             .FirstOrDefaultAsync();
@@ -69,6 +69,7 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
         var parfum = new Parfum
         {
             Ad = ad,
+            Cinsiyet = dto.Cinsiyet,
             MarkaId = dto.MarkaId,
             Notalar = dto.Notalar
                 .Select(n => new ParfumNota { NotaId = n.NotaId, Katman = n.Katman })
@@ -95,6 +96,7 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
         if (hata is not null) return hata;
 
         parfum.Ad = ad;
+        parfum.Cinsiyet = dto.Cinsiyet;
         parfum.MarkaId = dto.MarkaId;
 
         // Notaları farkıyla güncelle: çıkanları sil, kalanların katmanını güncelle, yenileri ekle

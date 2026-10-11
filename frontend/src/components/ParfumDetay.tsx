@@ -5,7 +5,7 @@ import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../api/client";
 import { gorselAdresi } from "../gorsel";
 import { tl } from "../para";
-import type { Marka, Muadil, ParfumDetayVeri } from "../types";
+import type { Cinsiyet, Marka, Muadil, ParfumDetayVeri } from "../types";
 import { ALAN, BUTON, BUTON_SADE, HataMesaji } from "./ui";
 
 type Olcut = "benzerlik" | "fiyat" | "kalicilik";
@@ -47,7 +47,12 @@ function Puan({ etiket, deger }: { etiket: string; deger: number }) {
   );
 }
 
-const BOS_FORM = { markaId: "0", kod: "", fiyat: "", urunLinki: "", kalicilikPuani: "5", benzerlikPuani: "5" };
+const BOS_FORM = { markaId: "0", kod: "", cinsiyet: "Unisex", fiyat: "", urunLinki: "", kalicilikPuani: "5", benzerlikPuani: "5" };
+const CINSIYETLER: { deger: Cinsiyet; etiket: string }[] = [
+  { deger: "Unisex", etiket: "Unisex" },
+  { deger: "Kadin", etiket: "Kadın" },
+  { deger: "Erkek", etiket: "Erkek" },
+];
 
 export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
   const { id } = useParams();
@@ -90,6 +95,7 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
         body: JSON.stringify({
           markaId: Number(form.markaId),
           kod: form.kod,
+          cinsiyet: form.cinsiyet,
           fiyat: Number(form.fiyat),
           urunLinki: form.urunLinki,
           kalicilikPuani: Number(form.kalicilikPuani),
@@ -192,6 +198,11 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
                 <div className="flex items-baseline justify-between gap-4">
                   <p className="font-baslik text-2xl">
                     {m.marka} {m.kod}
+                    {m.cinsiyet !== "Unisex" && (
+                      <span className="ml-2 text-sm font-normal text-buhar">
+                        ({m.cinsiyet === "Kadin" ? "Kadın" : "Erkek"})
+                      </span>
+                    )}
                   </p>
                   <p className="shrink-0 text-lg tabular-nums">{tl(m.fiyat)}</p>
                 </div>
@@ -231,6 +242,9 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
 
           <form onSubmit={muadilEkle} className="grid gap-3 sm:grid-cols-2">
             <h3 className="font-baslik text-xl sm:col-span-2">Muadil ekle</h3>
+            <p className="text-sm text-buhar sm:col-span-2">
+              Cinsiyeti yalnız marka aynı kodu kadın ve erkek üründe ayrı ayrı kullanıyorsa değiştir; aksi halde Unisex bırak.
+            </p>
             <select {...alan("markaId")} className={ALAN}>
               <option value="0">Muadil markası seç</option>
               {muadilMarkalar.map((m) => (
@@ -240,6 +254,13 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
               ))}
             </select>
             <input {...alan("kod")} placeholder="Kod (ör. 567)" className={ALAN} />
+            <select {...alan("cinsiyet")} className={ALAN}>
+              {CINSIYETLER.map((c) => (
+                <option key={c.deger} value={c.deger}>
+                  {c.etiket}
+                </option>
+              ))}
+            </select>
             <input {...alan("fiyat")} type="number" step="0.01" placeholder="Fiyat (50 ml)" className={ALAN} />
             <input {...alan("urunLinki")} type="url" placeholder="https://..." className={ALAN} />
             <label className="text-sm">

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Muadil.Domain.Entities;
 
 namespace Muadil.Api.Dtos;
 
@@ -6,6 +7,7 @@ public record MuadilDto(
     int Id,
     string Marka,
     string Kod,
+    Cinsiyet Cinsiyet,
     decimal Fiyat,
     int KalicilikPuani,
     int BenzerlikPuani,
@@ -17,4 +19,5 @@ public record MuadilKaydetDto(
     [Range(typeof(decimal), "1", "100000")] decimal Fiyat,
     [Required, MaxLength(500), Url] string UrunLinki,
     [Range(1, 10)] int KalicilikPuani,
-    [Range(1, 10)] int BenzerlikPuani);
+    [Range(1, 10)] int BenzerlikPuani,
+    [EnumDataType(typeof(Cinsiyet))] Cinsiyet Cinsiyet = Cinsiyet.Unisex);

@@ -13,6 +13,8 @@ export interface Nota {
 
 export type NotaKatmani = "Ust" | "Orta" | "Alt";
 
+export type Cinsiyet = "Kadin" | "Erkek" | "Unisex";
+
 export interface ParfumListe {
   id: number;
   ad: string;
@@ -32,6 +34,7 @@ export interface Muadil {
   id: number;
   marka: string;
   kod: string;
+  cinsiyet: Cinsiyet;
   fiyat: number;
   kalicilikPuani: number;
   benzerlikPuani: number;
@@ -41,6 +44,7 @@ export interface Muadil {
 export interface ParfumDetayVeri {
   id: number;
   ad: string;
+  cinsiyet: Cinsiyet;
   markaId: number;
   marka: string;
   gorselUrl: string | null;

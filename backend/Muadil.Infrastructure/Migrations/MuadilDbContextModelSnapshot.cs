@@ -57,6 +57,11 @@ namespace Muadil.Infrastructure.Migrations
                     b.Property<int>("BenzerlikPuani")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Cinsiyet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3);
+
                     b.Property<decimal>("Fiyat")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
@@ -87,7 +92,7 @@ namespace Muadil.Infrastructure.Migrations
 
                     b.HasIndex("ParfumId");
 
-                    b.HasIndex("MarkaId", "Kod")
+                    b.HasIndex("MarkaId", "Kod", "Cinsiyet")
                         .IsUnique()
                         .HasFilter("\"SilinmeTarihi\" IS NULL");
 
@@ -132,6 +137,11 @@ namespace Muadil.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Cinsiyet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3);
 
                     b.Property<string>("GorselUrl")
                         .HasColumnType("text");

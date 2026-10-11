@@ -22,6 +22,7 @@ public class IceAktarmaServisi(MuadilDbContext db)
         int yeniParfum = 0, guncellenenParfum = 0, yeniMuadil = 0, guncellenenMuadil = 0;
 
         static string Anahtar(string a, string b) => $"{a}\u001f{b}";
+        static string MuadilAnahtari(string marka, string kod, Cinsiyet cinsiyet) => $"{marka}\u001f{kod}\u001f{cinsiyet}";
 
         // Mevcut veriyi bir kez belleğe al (yüzlerce kayıt için hızlı ve basit)
         var markalar = new Dictionary<string, Marka>(k);
@@ -37,7 +38,7 @@ public class IceAktarmaServisi(MuadilDbContext db)
         // Silinmiş parfüme bağlı ama kendisi silinmemiş muadiller de tekil kod kuralına dahil
         var muadiller = new Dictionary<string, MuadilParfum>(k);
         foreach (var m in await db.MuadilParfumler.IgnoreQueryFilters().Where(m => m.SilinmeTarihi == null).ToListAsync(ct))
-            muadiller.TryAdd(Anahtar(m.Marka.Ad, m.Kod), m);
+            muadiller.TryAdd(MuadilAnahtari(m.Marka.Ad, m.Kod, m.Cinsiyet), m);
 
         Marka? MarkaBulVeyaOlustur(string ad, MarkaTuru tur, string sayfa, int satir)
         {
@@ -88,6 +89,7 @@ public class IceAktarmaServisi(MuadilDbContext db)
 
             if (parfumler.TryGetValue(anahtar, out var mevcut))
             {
+                mevcut.Cinsiyet = s.Cinsiyet;
                 NotalariGuncelle(mevcut, hedef);
                 guncellenenParfum++;
             }
@@ -96,6 +98,7 @@ public class IceAktarmaServisi(MuadilDbContext db)
                 var yeni = new Parfum
                 {
                     Ad = s.Ad,
+                    Cinsiyet = s.Cinsiyet,
                     Marka = marka,
                     Notalar = hedef.Select(h => new ParfumNota { Nota = h.Nota, Katman = h.Katman }).ToList()
                 };
@@ -119,10 +122,10 @@ public class IceAktarmaServisi(MuadilDbContext db)
             var marka = MarkaBulVeyaOlustur(s.MuadilMarka, MarkaTuru.Muadil, ExcelOkuyucu.MuadilSayfasi, s.Satir);
             if (marka is null) continue;
 
-            var anahtar = Anahtar(marka.Ad, s.Kod);
+            var anahtar = MuadilAnahtari(marka.Ad, s.Kod, s.Cinsiyet);
             if (!dosyadakiMuadiller.Add(anahtar))
             {
-                hatalar.Add(new(ExcelOkuyucu.MuadilSayfasi, s.Satir, $"{marka.Ad} {s.Kod} dosyada birden fazla kez var."));
+                hatalar.Add(new(ExcelOkuyucu.MuadilSayfasi, s.Satir, $"{marka.Ad} {s.Kod} ({s.Cinsiyet}) dosyada birden fazla kez var."));
                 continue;
             }
 
@@ -142,6 +145,7 @@ public class IceAktarmaServisi(MuadilDbContext db)
                     Parfum = parfum,
                     Marka = marka,
                     Kod = s.Kod,
+                    Cinsiyet = s.Cinsiyet,
                     Fiyat = s.Fiyat,
                     KalicilikPuani = s.Kalicilik,
                     BenzerlikPuani = s.Benzerlik,

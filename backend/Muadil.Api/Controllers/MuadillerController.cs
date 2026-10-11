@@ -26,6 +26,7 @@ public class MuadillerController(MuadilDbContext db) : ControllerBase
             ParfumId = parfumId,
             MarkaId = dto.MarkaId,
             Kod = kod,
+            Cinsiyet = dto.Cinsiyet,
             Fiyat = dto.Fiyat,
             UrunLinki = dto.UrunLinki.Trim(),
             KalicilikPuani = dto.KalicilikPuani,
@@ -37,7 +38,7 @@ public class MuadillerController(MuadilDbContext db) : ControllerBase
 
         var markaAdi = await db.Markalar.Where(m => m.Id == dto.MarkaId).Select(m => m.Ad).FirstAsync();
         return Created($"/api/muadiller/{muadil.Id}", new MuadilDto(
-            muadil.Id, markaAdi, muadil.Kod, muadil.Fiyat,
+            muadil.Id, markaAdi, muadil.Kod, muadil.Cinsiyet, muadil.Fiyat,
             muadil.KalicilikPuani, muadil.BenzerlikPuani, muadil.UrunLinki));
     }
 
@@ -53,6 +54,7 @@ public class MuadillerController(MuadilDbContext db) : ControllerBase
 
         muadil.MarkaId = dto.MarkaId;
         muadil.Kod = kod;
+        muadil.Cinsiyet = dto.Cinsiyet;
         muadil.Fiyat = dto.Fiyat;
         muadil.UrunLinki = dto.UrunLinki.Trim();
         muadil.KalicilikPuani = dto.KalicilikPuani;
@@ -84,10 +86,11 @@ public class MuadillerController(MuadilDbContext db) : ControllerBase
             .AnyAsync(m =>
                 m.MarkaId == dto.MarkaId &&
                 m.Kod.ToLower() == kod.ToLower() &&
+                m.Cinsiyet == dto.Cinsiyet &&
                 m.SilinmeTarihi == null &&
                 (haricId == null || m.Id != haricId));
         if (kodVar)
-            return Conflict(new { mesaj = $"{marka.Ad} markasında '{kod}' kodu zaten kullanılıyor." });
+            return Conflict(new { mesaj = $"{marka.Ad} markasında '{kod}' kodu ({dto.Cinsiyet}) zaten kullanılıyor." });
 
         return null;
     }
