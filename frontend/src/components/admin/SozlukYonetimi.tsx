@@ -1,19 +1,35 @@
 import { useEffect, useState } from "react";
-import type { FormEvent, KeyboardEvent } from "react";
+import type { ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../../api/client";
+import { gorselAdresi } from "../../gorsel";
 import type { MarkaTuru } from "../../types";
 import { ALAN, BUTON, BUTON_SADE, HataMesaji } from "../ui";
 
-type Kayit = { id: number; ad: string; tur?: MarkaTuru };
+type Kayit = { id: number; ad: string; tur?: MarkaTuru; gorselUrl?: string | null };
 
 type Props = {
-  uc: string;       // "/api/markalar" ya da "/api/notalar"
-  tekil: string;    // ekranda görünen ad: "marka", "nota"
-  turlu?: boolean;  // markaların türü var, notaların yok
+  uc: string;        // "/api/markalar" ya da "/api/notalar"
+  tekil: string;      // ekranda görünen ad: "marka", "nota"
+  turlu?: boolean;    // markaların türü var, notaların yok
+  gorselli?: boolean; // markaların logosu var, notaların yok
 };
 
-export default function SozlukYonetimi({ uc, tekil, turlu = false }: Props) {
+function Logo({ url }: { url: string | null | undefined }) {
+  const [yuklenemedi, setYuklenemedi] = useState(false);
+  const adres = gorselAdresi(url ?? null);
+  if (!adres || yuklenemedi) return null;
+  return (
+    <img
+      src={adres}
+      alt=""
+      className="h-6 w-6 shrink-0 rounded-full bg-white object-contain"
+      onError={() => setYuklenemedi(true)}
+    />
+  );
+}
+
+export default function SozlukYonetimi({ uc, tekil, turlu = false, gorselli = false }: Props) {
   const token = useAuth().user?.access_token;
   const [kayitlar, setKayitlar] = useState<Kayit[]>([]);
   const [yeniAd, setYeniAd] = useState("");
@@ -62,6 +78,22 @@ export default function SozlukYonetimi({ uc, tekil, turlu = false }: Props) {
     if (e.key === "Escape") setDuzenlenen(null);
   }
 
+  async function gorselYukle(e: ChangeEvent<HTMLInputElement>, id: number) {
+    const dosya = e.target.files?.[0];
+    if (!dosya) return;
+    setHata("");
+    try {
+      const veri = new FormData();
+      veri.append("dosya", dosya);
+      await apiIstek(`${uc}/${id}/gorsel`, token, { method: "POST", body: veri });
+      await yukle();
+    } catch (err) {
+      setHata((err as Error).message);
+    } finally {
+      e.target.value = "";
+    }
+  }
+
   const turSecimi = (deger: MarkaTuru | undefined, degistir: (t: MarkaTuru) => void) => (
     <select value={deger} onChange={(e) => degistir(e.target.value as MarkaTuru)} aria-label="Tür" className={`${ALAN} w-auto`}>
       <option value="Orijinal">Orijinal</option>
@@ -103,11 +135,25 @@ export default function SozlukYonetimi({ uc, tekil, turlu = false }: Props) {
               </form>
             ) : (
               <div className="flex items-center justify-between gap-4">
-                <span>
+                <span className="flex items-center gap-2">
+                  {gorselli && <Logo url={k.gorselUrl} />}
                   {k.ad}
                   {turlu && <span className="ml-2 text-sm text-buhar">{k.tur}</span>}
                 </span>
-                <button onClick={() => setDuzenlenen(k)} className={BUTON_SADE}>Düzenle</button>
+                <div className="flex items-center gap-3">
+                  {gorselli && (
+                    <label className={`${BUTON_SADE} cursor-pointer`}>
+                      {k.gorselUrl ? "Logo değiştir" : "Logo yükle"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => gorselYukle(e, k.id)}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                  <button onClick={() => setDuzenlenen(k)} className={BUTON_SADE}>Düzenle</button>
+                </div>
               </div>
             )}
           </li>

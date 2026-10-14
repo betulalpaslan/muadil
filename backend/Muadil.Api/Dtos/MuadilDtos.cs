@@ -6,6 +6,7 @@ namespace Muadil.Api.Dtos;
 public record MuadilDto(
     int Id,
     string Marka,
+    string? MarkaGorselUrl,
     string Kod,
     Cinsiyet Cinsiyet,
     decimal Fiyat,

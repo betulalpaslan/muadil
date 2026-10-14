@@ -1,5 +1,9 @@
 @import "tailwindcss";
+@import "./tasarim/tasarim.css";
 
+/* Eski "I · Karışım" tokenları yalnız /admin panelinde kullanılır (bkz. AdminSayfasi.tsx);
+   herkese açık sayfalar artık tasarim.css'teki zemin/yazi/vurgu/yuzey/soluk değişkenlerini kullanır.
+   Admin panelin teması gece/gündüz ile değişmesin diye bu tonlar sabit tutulur. */
 @theme {
   --color-cam: #f3f2f7;
   --color-murekkep: #2b1a33;
@@ -10,14 +14,13 @@
   --color-alt: #8c5e3c;
 
   --font-baslik: "Instrument Serif", serif;
-  --font-govde: "Albert Sans", sans-serif;
 }
 
 body {
-  @apply bg-cam text-murekkep font-govde antialiased;
+  @apply bg-zemin text-yazi font-govde antialiased;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-murekkep);
+  outline: 2px solid currentColor;
   outline-offset: 2px;
 }

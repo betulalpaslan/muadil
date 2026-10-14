@@ -29,10 +29,12 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
         {
             e.Property(x => x.Ad).HasMaxLength(200).IsRequired();
             e.Property(x => x.Cinsiyet).HasDefaultValue(Cinsiyet.Unisex);
+            e.Property(x => x.Renk).HasMaxLength(7);
             e.HasOne(x => x.Marka).WithMany()
                 .HasForeignKey(x => x.MarkaId)
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasQueryFilter(x => x.SilinmeTarihi == null);
+            e.ToTable(t => t.HasCheckConstraint("CK_Parfum_Renk", "\"Renk\" IS NULL OR \"Renk\" ~ '^#[0-9A-Fa-f]{6}$'"));
         });
 
         modelBuilder.Entity<MuadilParfum>(e =>

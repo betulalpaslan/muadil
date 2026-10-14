@@ -6,6 +6,7 @@ public class Parfum
     public string Ad { get; set; } = string.Empty;
     public Cinsiyet Cinsiyet { get; set; } = Cinsiyet.Unisex;
     public string? GorselUrl { get; set; }
+    public string? Renk { get; set; }
     public DateTime? SilinmeTarihi { get; set; }
 
     public int MarkaId { get; set; }

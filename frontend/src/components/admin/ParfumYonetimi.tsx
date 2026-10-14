@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../../api/client";
-import type { ParfumListe } from "../../types";
+import type { ParfumListe, RenkAlgilamaSonucu } from "../../types";
 import { BUTON, BUTON_SADE, HataMesaji } from "../ui";
 import ParfumFormu from "./ParfumFormu";
 
@@ -13,6 +13,8 @@ export default function ParfumYonetimi() {
   const [parfumler, setParfumler] = useState<ParfumListe[]>([]);
   const [form, setForm] = useState<FormDurumu>({ acik: false });
   const [hata, setHata] = useState("");
+  const [renkAlgilaniyor, setRenkAlgilaniyor] = useState(false);
+  const [renkSonucu, setRenkSonucu] = useState("");
 
   async function yukle() {
     setParfumler(await apiIstek<ParfumListe[]>("/api/parfumler"));
@@ -43,14 +45,41 @@ export default function ParfumYonetimi() {
     }
   }
 
+  const gorselliRenksizSayisi = parfumler.filter((p) => p.gorselUrl && !p.renk).length;
+
+  async function renkAlgila() {
+    setHata("");
+    setRenkSonucu("");
+    setRenkAlgilaniyor(true);
+    try {
+      const sonuc = await apiIstek<RenkAlgilamaSonucu[]>("/api/parfumler/renk-algila-toplu", token, { method: "POST" });
+      setRenkSonucu(sonuc.length ? `${sonuc.length} parfüme görselinden renk önerildi.` : "Renklendirilecek yeni görsel bulunamadı.");
+      await yukle();
+    } catch (e) {
+      setHata((e as Error).message);
+    } finally {
+      setRenkAlgilaniyor(false);
+    }
+  }
+
   return (
     <section>
       {form.acik ? (
         <ParfumFormu key={form.id ?? "yeni"} parfumId={form.id} onBitti={formBitti} />
       ) : (
-        <button onClick={() => setForm({ acik: true })} className={BUTON}>Yeni parfüm</button>
+        <div className="flex flex-wrap items-center gap-4">
+          <button onClick={() => setForm({ acik: true })} className={BUTON}>Yeni parfüm</button>
+          {gorselliRenksizSayisi > 0 && (
+            <button onClick={renkAlgila} disabled={renkAlgilaniyor} className={BUTON_SADE}>
+              {renkAlgilaniyor
+                ? "Renkler algılanıyor..."
+                : `Görseli olup rengi boş ${gorselliRenksizSayisi} parfüme görselden renk öner`}
+            </button>
+          )}
+        </div>
       )}
 
+      {renkSonucu && <p className="mt-3 text-sm text-buhar">{renkSonucu}</p>}
       <HataMesaji mesaj={hata} />
 
       <ul className="mt-6 divide-y divide-cizgi">

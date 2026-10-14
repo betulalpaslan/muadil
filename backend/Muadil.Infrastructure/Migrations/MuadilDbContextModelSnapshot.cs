@@ -35,6 +35,9 @@ namespace Muadil.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("GorselUrl")
+                        .HasColumnType("text");
+
                     b.Property<int>("Tur")
                         .HasColumnType("integer");
 
@@ -149,6 +152,10 @@ namespace Muadil.Infrastructure.Migrations
                     b.Property<int>("MarkaId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Renk")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
                     b.Property<DateTime?>("SilinmeTarihi")
                         .HasColumnType("timestamp with time zone");
 
@@ -156,7 +163,10 @@ namespace Muadil.Infrastructure.Migrations
 
                     b.HasIndex("MarkaId");
 
-                    b.ToTable("Parfumler");
+                    b.ToTable("Parfumler", t =>
+                        {
+                            t.HasCheckConstraint("CK_Parfum_Renk", "\"Renk\" IS NULL OR \"Renk\" ~ '^#[0-9A-Fa-f]{6}$'");
+                        });
                 });
 
             modelBuilder.Entity("Muadil.Domain.Entities.ParfumNota", b =>

@@ -1,0 +1,161 @@
+/* Muadil tasarım sistemi (K · Siyah dergi). index.css içinde @import "tailwindcss"; satırından SONRA import edilir. */
+@import "@fontsource/syne/400.css";
+@import "@fontsource/syne/500.css";
+@import "@fontsource/syne/600.css";
+@import "@fontsource/syne/700.css";
+@import "@fontsource/syne/800.css";
+
+/* ₺ işareti her yazı tipinde doğru çizilmiyor; yalnızca U+20BA Inter'den gelir. */
+@font-face {
+  font-family: "Lira Isareti";
+  src: url("../../node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+20BA;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Tema değişkenleri. Gece varsayılan; <html data-tema="gunduz"> gündüze geçirir.
+   Gündüzde renkler yer değiştirir: zemin açık, yazı ve çizgiler koyu, krem bantlar koyu bant olur. */
+:root {
+  --si: #0b0b0b; /* zemin */
+  --be: #f2eee8; /* yazı, çizgi, çerçeve */
+  --ta: #c8b497; /* vurgu (taupe) */
+  --ta2: #7a6548; /* ters bantlarda vurgu */
+  --gr: #1a1a1a; /* yüzey: görsel yeri, sekme hover */
+  --gr2: #8a8580; /* soluk yazı */
+  --p1: #d9dde2; /* parıltı açık */
+  --p2: #a9aeb5; /* parıltı koyu */
+  color-scheme: dark;
+}
+:root[data-tema="gunduz"] {
+  --si: #f4f0e9;
+  --be: #141212;
+  --ta: #7a6548;
+  --ta2: #c8b497;
+  --gr: #e3ddd3;
+  --gr2: #6f6a64;
+  --p1: #8f959d;
+  --p2: #6b7178;
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-govde: "Lira Isareti", "Syne", system-ui, sans-serif;
+  --color-zemin: var(--si);
+  --color-yazi: var(--be);
+  --color-vurgu: var(--ta);
+  --color-vurgu-ters: var(--ta2);
+  --color-yuzey: var(--gr);
+  --color-soluk: var(--gr2);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-govde);
+    background: var(--si);
+    color: var(--be);
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+  input::placeholder {
+    color: var(--gr2);
+  }
+}
+
+/* Geniş aralıklı büyük harf başlık */
+@utility genis {
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+/* Küçük etiket: menü, kategori, düğme yazısı */
+@utility kucuk {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+/* Çizgili hap/daire: hover'da içi dolar */
+@utility cizgili {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  &:hover {
+    background-color: var(--be);
+    color: var(--si);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+/* Fotoğraf çerçevesi: düz, kenarları düz, altında etiket satırı */
+@utility cerceve {
+  padding: 14px 14px 12px;
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 0.45));
+}
+
+@keyframes kay {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes don {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@utility serit-kay {
+  animation: kay 40s linear infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@utility rozet-don {
+  animation: don 24s linear infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes sallan {
+  0%,
+  100% {
+    transform: rotate(-6deg) scale(1);
+  }
+  50% {
+    transform: rotate(6deg) scale(1.05);
+  }
+}
+@keyframes ucgel {
+  from {
+    transform: translate(70vw, -40vh) rotate(35deg) scale(0.3);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+/* Sayfa açılışında dışarıdan uçup gelir, sonra tıklanabilir olduğunu belli eden hafif sallanma; hover/basılıyken durur */
+@utility oynak {
+  animation:
+    ucgel 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both,
+    sallan 1.4s ease-in-out 0.8s infinite;
+  &:hover,
+  &:active {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

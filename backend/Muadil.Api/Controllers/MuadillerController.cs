@@ -36,9 +36,10 @@ public class MuadillerController(MuadilDbContext db) : ControllerBase
         db.MuadilParfumler.Add(muadil);
         await db.SaveChangesAsync();
 
-        var markaAdi = await db.Markalar.Where(m => m.Id == dto.MarkaId).Select(m => m.Ad).FirstAsync();
+        var marka = await db.Markalar.Where(m => m.Id == dto.MarkaId)
+            .Select(m => new { m.Ad, m.GorselUrl }).FirstAsync();
         return Created($"/api/muadiller/{muadil.Id}", new MuadilDto(
-            muadil.Id, markaAdi, muadil.Kod, muadil.Cinsiyet, muadil.Fiyat,
+            muadil.Id, marka.Ad, marka.GorselUrl, muadil.Kod, muadil.Cinsiyet, muadil.Fiyat,
             muadil.KalicilikPuani, muadil.BenzerlikPuani, muadil.UrunLinki));
     }
 

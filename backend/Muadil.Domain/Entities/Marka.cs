@@ -6,5 +6,6 @@ public class Marka
     public int Id { get; set; }
     public string Ad { get; set; }=string.Empty;
     public MarkaTuru Tur { get; set; }
+    public string? GorselUrl { get; set; }
 
 }

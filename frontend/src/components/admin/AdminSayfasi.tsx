@@ -15,7 +15,8 @@ export default function AdminSayfasi() {
   const sekme = SEKMELER.find((s) => s.id === params.get("sekme"))?.id ?? "parfumler";
 
   return (
-    <div>
+    <main className="min-h-dvh bg-cam px-4 py-8 text-murekkep">
+      <div className="mx-auto max-w-3xl">
       <h1 className="font-baslik text-4xl">Yönetim</h1>
 
       <nav aria-label="Yönetim bölümleri" className="mt-6 flex gap-6 overflow-x-auto border-b border-cizgi">
@@ -35,10 +36,11 @@ export default function AdminSayfasi() {
 
       <div className="mt-6">
         {sekme === "parfumler" && <ParfumYonetimi />}
-        {sekme === "markalar" && <SozlukYonetimi uc="/api/markalar" tekil="marka" turlu />}
+        {sekme === "markalar" && <SozlukYonetimi uc="/api/markalar" tekil="marka" turlu gorselli />}
         {sekme === "notalar" && <SozlukYonetimi uc="/api/notalar" tekil="nota" />}
         {sekme === "toplu" && <TopluYukleme />}
       </div>
-    </div>
+      </div>
+    </main>
   );
 }

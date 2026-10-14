@@ -5,23 +5,25 @@ import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../api/client";
 import { gorselAdresi } from "../gorsel";
 import { tl } from "../para";
+import { gercekRenk, pastel } from "../tasarim/renk";
 import type { Cinsiyet, Marka, Muadil, ParfumDetayVeri } from "../types";
-import { ALAN, BUTON, BUTON_SADE, HataMesaji } from "./ui";
+import { Footer } from "./OrtakYerlesim";
+import Asterisk from "./tasarim/Asterisk";
+import Cerceve from "./tasarim/Cerceve";
+import NotaSprey from "./tasarim/NotaSprey";
+import ParfumSisesi from "./tasarim/ParfumSisesi";
+import { HataMesaji } from "./ui";
 
 type Olcut = "benzerlik" | "fiyat" | "kalicilik";
 
 const OLCUTLER: { deger: Olcut; etiket: string }[] = [
   { deger: "benzerlik", etiket: "En benzer" },
-  { deger: "fiyat", etiket: "En ucuz" },
+  { deger: "fiyat", etiket: "En uygun" },
   { deger: "kalicilik", etiket: "En kalıcı" },
 ];
 
-// Piramit: üstte dar, altta geniş. Sınıflar tam yazılmalı (Tailwind parça birleştirmeyi göremez).
-const PIRAMIT = [
-  { katman: "Ust", etiket: "Üst notalar", sinif: "w-3/5 bg-ust" },
-  { katman: "Orta", etiket: "Orta notalar", sinif: "w-4/5 bg-orta" },
-  { katman: "Alt", etiket: "Alt notalar", sinif: "w-full bg-alt text-cam" },
-] as const;
+// Kart zeminleri sırayla yuzey, vurgu ve yazi renginde (TASARIM.md §6).
+const KART_ZEMIN = ["bg-yuzey text-yazi", "bg-vurgu text-zemin", "bg-yazi text-zemin"];
 
 function sirala(liste: Muadil[], olcut: Olcut): Muadil[] {
   return [...liste].sort((a, b) => {
@@ -31,19 +33,65 @@ function sirala(liste: Muadil[], olcut: Olcut): Muadil[] {
   });
 }
 
-function Puan({ etiket, deger }: { etiket: string; deger: number }) {
+function Ok({ boyut = 12 }: { boyut?: number }) {
   return (
-    <div>
-      <p className="mb-1 flex justify-between text-xs text-buhar">
-        <span>{etiket}</span>
-        <span className="tabular-nums">{deger}/10</span>
-      </p>
-      <div className="flex gap-0.5" aria-hidden="true">
-        {Array.from({ length: 10 }, (_, i) => (
-          <span key={i} className={`h-1.5 flex-1 rounded-full ${i < deger ? "bg-murekkep" : "bg-cizgi"}`} />
-        ))}
-      </div>
-    </div>
+    <svg width={boyut} height={boyut} viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M5 15L15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth={2.6} />
+    </svg>
+  );
+}
+
+function OkDairesi({ boyut = 46 }: { boyut?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-flex shrink-0 items-center justify-center rounded-full border-2 border-yazi bg-vurgu"
+      style={{ width: boyut, height: boyut }}
+    >
+      <svg width={boyut * 0.4} height={boyut * 0.4} viewBox="0 0 20 20">
+        <path d="M5 15L15 5M7 5h8v8" fill="none" strokeWidth={2.6} strokeLinecap="square" style={{ stroke: "var(--si)" }} />
+      </svg>
+    </span>
+  );
+}
+
+function MarkaRozeti({ marka, url }: { marka: string; url: string | null }) {
+  const [yuklenemedi, setYuklenemedi] = useState(false);
+  const adres = gorselAdresi(url);
+  return (
+    <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F2EEE8]">
+      {adres && !yuklenemedi ? (
+        <img src={adres} alt="" className="h-full w-full object-contain" onError={() => setYuklenemedi(true)} />
+      ) : (
+        <span className="text-xl font-extrabold text-[#0B0B0B]">{marka.slice(0, 1).toUpperCase()}</span>
+      )}
+    </span>
+  );
+}
+
+function KopyalaDugmesi({ kod, fiyat }: { kod: string; fiyat: number }) {
+  const [kopyalandi, setKopyalandi] = useState(false);
+
+  async function kopyala() {
+    try {
+      await navigator.clipboard.writeText(kod);
+      setKopyalandi(true);
+      setTimeout(() => setKopyalandi(false), 2000);
+    } catch {
+      // pano erişimi yoksa sessizce yok say
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={kopyala}
+      className="cizgili flex min-h-14 flex-1 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-yazi bg-transparent text-yazi"
+    >
+      <span className="text-[10px] tracking-[0.08em]" aria-live="polite">
+        {kopyalandi ? "kopyalandı ✓" : `${tl(fiyat)} · 50 ml`}
+      </span>
+    </button>
   );
 }
 
@@ -53,6 +101,9 @@ const CINSIYETLER: { deger: Cinsiyet; etiket: string }[] = [
   { deger: "Kadin", etiket: "Kadın" },
   { deger: "Erkek", etiket: "Erkek" },
 ];
+
+const YONETIM_ALAN =
+  "h-11 min-w-0 rounded-full border-[1.5px] border-yazi bg-transparent px-4 text-sm text-yazi placeholder:text-soluk focus:outline-none";
 
 export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
   const { id } = useParams();
@@ -136,149 +187,198 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
   }
 
   if (!parfum) {
-    return <p className="text-buhar">{hata ? "Bu parfüm bulunamadı. Aramaya dönüp tekrar dene." : "Yükleniyor..."}</p>;
+    return <p className="p-10 text-center text-sm">{hata ? "Bu parfüm bulunamadı. Aramaya dönüp tekrar dene." : "Yükleniyor..."}</p>;
   }
 
   const gorsel = gorselAdresi(parfum.gorselUrl);
+  const enUcuzFiyat = parfum.muadiller.length ? Math.min(...parfum.muadiller.map((m) => m.fiyat)) : null;
+  const enUcuzId = parfum.muadiller.length
+    ? parfum.muadiller.reduce((a, b) => (b.fiyat < a.fiyat ? b : a)).id
+    : null;
+  const siraliMuadiller = sirala(parfum.muadiller, olcut);
 
   return (
     <article>
-      <Link to="/" className="text-sm text-buhar hover:text-murekkep">
-        ← Aramaya dön
-      </Link>
-
-      <header className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end">
-        {gorsel && (
-          <img src={gorsel} alt={parfum.ad} className="h-48 w-48 shrink-0 rounded-lg bg-white object-contain" />
-        )}
-        <div>
-          <h1 className="font-baslik text-5xl leading-none">{parfum.ad}</h1>
-          <p className="mt-2 text-buhar">{parfum.marka}</p>
+      <section className="flex flex-col gap-5 px-[clamp(16px,5vw,70px)] pt-10 pb-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="kucuk inline-flex min-h-11 items-center text-yazi no-underline">
+            ← tüm parfümler
+          </Link>
+          <span className="text-[13px] font-bold tracking-[0.08em]">01</span>
         </div>
-      </header>
+        <h1 className="genis m-0 text-[clamp(26px,3.2vw,42px)] leading-[1.15] font-extrabold [word-spacing:.2em]">{parfum.ad}</h1>
 
-      <section aria-label="Nota piramidi" className="mt-10 flex flex-col items-center gap-1">
-        {PIRAMIT.map((p) => {
-          const notalar = parfum.notalar.filter((n) => n.katman === p.katman);
-          if (notalar.length === 0) return null;
-          return (
-            <div key={p.katman} className={`${p.sinif} rounded-md px-4 py-3 text-center`}>
-              <p className="text-xs opacity-75">{p.etiket}</p>
-              <p className="font-baslik text-xl">{notalar.map((n) => n.notaAd).join(", ")}</p>
+        <div className="flex flex-wrap items-start gap-[clamp(24px,5vw,64px)]">
+          <div className="relative min-w-0 flex-1 basis-[320px] max-w-[440px]">
+            <Cerceve sol={`${parfum.marka} · ${parfum.ad}`} sag="no. 01">
+              <div
+                className="flex aspect-[4/5] items-center justify-center overflow-hidden"
+                style={{ background: pastel(parfum.renk, 0.8) }}
+              >
+                {gorsel ? (
+                  <img src={gorsel} alt={parfum.ad} className="h-full w-full object-cover" />
+                ) : (
+                  <ParfumSisesi genislik={150} govde="#0B0B0B" parlak="#F2EEE8" />
+                )}
+              </div>
+            </Cerceve>
+            <Asterisk boyut={76} className="absolute top-10 left-[max(-30px,-2vw)] z-[3]" />
+          </div>
+
+          <div className="flex min-w-0 flex-1 basis-[380px] flex-col gap-5 overflow-hidden">
+            <span className="kucuk inline-flex items-center gap-2.5">
+              <span
+                className="h-[18px] w-[18px] rounded-full border-[1.5px] border-yazi"
+                style={{ background: gercekRenk(parfum.renk) }}
+                aria-hidden="true"
+              />
+              {parfum.marka} · orijinal
+            </span>
+            <div className="flex items-center gap-[18px]">
+              <OkDairesi />
+              <span className="genis text-[clamp(18px,2vw,24px)]">
+                <span className="text-vurgu">{parfum.muadiller.length} muadil</span> · en uygun{" "}
+                {enUcuzFiyat !== null ? tl(enUcuzFiyat) : "-"}
+              </span>
             </div>
-          );
-        })}
+
+            <NotaSprey notalar={parfum.notalar} />
+          </div>
+        </div>
       </section>
 
-      <section className="mt-14">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-baslik text-3xl">Muadiller</h2>
-          {parfum.muadiller.length > 1 && (
-            <div role="group" aria-label="Sıralama" className="flex gap-1 rounded-full border border-cizgi p-1 text-sm">
-              {OLCUTLER.map((o) => (
-                <button
-                  key={o.deger}
-                  aria-pressed={olcut === o.deger}
-                  onClick={() => setOlcut(o.deger)}
-                  className={`rounded-full px-3 py-1 ${olcut === o.deger ? "bg-murekkep text-cam" : "text-buhar hover:text-murekkep"}`}
+      <section id="muadiller" className="relative border-t-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] pt-14 pb-16">
+        {parfum.muadiller.length === 0 ? (
+          <p className="text-sm">Bu parfüm için henüz muadil eklenmedi.</p>
+        ) : (
+          <>
+            {parfum.muadiller.length > 1 && (
+              <label className="mb-6 flex items-center gap-2.5 self-end text-sm font-bold text-yazi">
+                Sırala
+                <select
+                  value={olcut}
+                  onChange={(e) => setOlcut(e.target.value as Olcut)}
+                  className="cizgili h-11 cursor-pointer rounded-full border-2 border-yazi bg-vurgu px-4 text-sm font-bold text-zemin normal-case"
                 >
-                  {o.etiket}
-                </button>
+                  {OLCUTLER.map((o) => (
+                    <option key={o.deger} value={o.deger} className="bg-zemin text-yazi">
+                      {o.etiket}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <div className="grid min-w-0 gap-[clamp(20px,3vw,40px)]" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+              {siraliMuadiller.map((m, i) => (
+                <div key={m.id} className="flex flex-col gap-5">
+                  <div className={`relative box-border flex aspect-[4/3] flex-col justify-between p-4 ${KART_ZEMIN[i % 3]}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-bold tracking-[0.08em]">{String(i + 2).padStart(2, "0")}</span>
+                      {m.id === enUcuzId && (
+                        <span className="kucuk rounded-full border-[1.5px] px-2.5 py-[5px] text-[8px]" style={{ borderColor: "currentColor" }}>
+                          en uygun
+                        </span>
+                      )}
+                    </div>
+                    <span className="flex min-w-0 flex-col items-center gap-2">
+                      <MarkaRozeti marka={m.marka} url={m.markaGorselUrl} />
+                      <span className="truncate text-[clamp(22px,2.6vw,32px)] leading-none font-extrabold tracking-[0.04em]">
+                        {m.kod}
+                      </span>
+                    </span>
+                    <span className="kucuk flex items-center justify-between gap-2 text-[9px]">
+                      <span className="truncate">{m.marka}</span>
+                      <span className="shrink-0">
+                        benzerlik {m.benzerlikPuani} · kalıcılık {m.kalicilikPuani}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <KopyalaDugmesi kod={m.kod} fiyat={m.fiyat} />
+                    <a
+                      href={m.urunLinki}
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Mağazaya git"
+                      className="cizgili flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[1.5px] border-yazi text-yazi"
+                    >
+                      <Ok boyut={16} />
+                      <span className="sr-only"> (yeni sekmede açılır)</span>
+                    </a>
+                    {adminMi && (
+                      <button
+                        type="button"
+                        onClick={() => muadilSil(m)}
+                        className="kucuk shrink-0 cursor-pointer border-0 bg-transparent text-soluk underline"
+                      >
+                        sil
+                      </button>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {parfum.muadiller.length === 0 ? (
-          <p className="mt-4 text-buhar">Bu parfüm için henüz muadil eklenmedi.</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-cizgi">
-            {sirala(parfum.muadiller, olcut).map((m) => (
-              <li key={m.id} className="py-5">
-                <div className="flex items-baseline justify-between gap-4">
-                  <p className="font-baslik text-2xl">
-                    {m.marka} {m.kod}
-                    {m.cinsiyet !== "Unisex" && (
-                      <span className="ml-2 text-sm font-normal text-buhar">
-                        ({m.cinsiyet === "Kadin" ? "Kadın" : "Erkek"})
-                      </span>
-                    )}
-                  </p>
-                  <p className="shrink-0 text-lg tabular-nums">{tl(m.fiyat)}</p>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-4 sm:max-w-sm">
-                  <Puan etiket="Benzerlik" deger={m.benzerlikPuani} />
-                  <Puan etiket="Kalıcılık" deger={m.kalicilikPuani} />
-                </div>
-                <div className="mt-3 flex items-center gap-4">
-                  <a
-                    href={m.urunLinki}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium underline underline-offset-4"
-                  >
-                    Mağazada gör<span className="sr-only"> (yeni sekmede açılır)</span>
-                  </a>
-                  {adminMi && (
-                    <button onClick={() => muadilSil(m)} className={BUTON_SADE}>
-                      Sil
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+          </>
         )}
       </section>
 
       {adminMi && (
-        <section className="mt-16 space-y-6 border-t border-cizgi pt-6">
-          <h2 className="font-baslik text-2xl">Yönetim</h2>
+        <section className="space-y-6 border-t-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] py-10">
+          <h2 className="genis text-xl">Yönetim</h2>
 
-          <label className="block text-sm">
+          <label className="kucuk block text-soluk">
             Görsel {parfum.gorselUrl ? "değiştir" : "yükle"}
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={gorselYukle} className="mt-1 block" />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={gorselYukle}
+              className="mt-2 block text-sm font-sans text-yazi normal-case"
+            />
           </label>
 
           <form onSubmit={muadilEkle} className="grid gap-3 sm:grid-cols-2">
-            <h3 className="font-baslik text-xl sm:col-span-2">Muadil ekle</h3>
-            <p className="text-sm text-buhar sm:col-span-2">
+            <h3 className="genis sm:col-span-2">Muadil ekle</h3>
+            <p className="text-sm sm:col-span-2">
               Cinsiyeti yalnız marka aynı kodu kadın ve erkek üründe ayrı ayrı kullanıyorsa değiştir; aksi halde Unisex bırak.
             </p>
-            <select {...alan("markaId")} className={ALAN}>
-              <option value="0">Muadil markası seç</option>
+            <select {...alan("markaId")} className={`${YONETIM_ALAN} normal-case`}>
+              <option value="0" className="bg-zemin">
+                Muadil markası seç
+              </option>
               {muadilMarkalar.map((m) => (
-                <option key={m.id} value={m.id}>
+                <option key={m.id} value={m.id} className="bg-zemin">
                   {m.ad}
                 </option>
               ))}
             </select>
-            <input {...alan("kod")} placeholder="Kod (ör. 567)" className={ALAN} />
-            <select {...alan("cinsiyet")} className={ALAN}>
+            <input {...alan("kod")} placeholder="Kod (ör. 567)" className={YONETIM_ALAN} />
+            <select {...alan("cinsiyet")} className={`${YONETIM_ALAN} normal-case`}>
               {CINSIYETLER.map((c) => (
-                <option key={c.deger} value={c.deger}>
+                <option key={c.deger} value={c.deger} className="bg-zemin">
                   {c.etiket}
                 </option>
               ))}
             </select>
-            <input {...alan("fiyat")} type="number" step="0.01" placeholder="Fiyat (50 ml)" className={ALAN} />
-            <input {...alan("urunLinki")} type="url" placeholder="https://..." className={ALAN} />
-            <label className="text-sm">
+            <input {...alan("fiyat")} type="number" step="0.01" placeholder="Fiyat (50 ml)" className={YONETIM_ALAN} />
+            <input {...alan("urunLinki")} type="url" placeholder="https://..." className={YONETIM_ALAN} />
+            <label className="kucuk text-soluk">
               Kalıcılık (1-10)
-              <input {...alan("kalicilikPuani")} type="number" min={1} max={10} className={`${ALAN} mt-1`} />
+              <input {...alan("kalicilikPuani")} type="number" min={1} max={10} className={`${YONETIM_ALAN} mt-1 w-full`} />
             </label>
-            <label className="text-sm">
+            <label className="kucuk text-soluk">
               Benzerlik (1-10)
-              <input {...alan("benzerlikPuani")} type="number" min={1} max={10} className={`${ALAN} mt-1`} />
+              <input {...alan("benzerlikPuani")} type="number" min={1} max={10} className={`${YONETIM_ALAN} mt-1 w-full`} />
             </label>
-            <button type="submit" className={`${BUTON} sm:col-span-2`}>
+            <button type="submit" className="cizgili kucuk rounded-full border-[1.5px] border-yazi px-6 py-3 sm:col-span-2">
               Muadili ekle
             </button>
           </form>
+
+          <HataMesaji mesaj={hata} />
         </section>
       )}
 
-      <HataMesaji mesaj={hata} />
+      <Footer />
     </article>
   );
 }

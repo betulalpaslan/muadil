@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { useAuth } from "react-oidc-context";
 import { apiIstek } from "../../api/client";
+import { gorselAdresi } from "../../gorsel";
+import { VARSAYILAN_RENK } from "../../tasarim/renk";
 import type { Cinsiyet, Marka, Nota, NotaKatmani, ParfumDetayVeri } from "../../types";
 import { ALAN, BUTON, BUTON_SADE, HataMesaji } from "../ui";
 
@@ -19,6 +21,8 @@ const CINSIYETLER: { deger: Cinsiyet; etiket: string }[] = [
 
 type SeciliNota = { notaId: number; katman: NotaKatmani };
 
+const HEX_DESENI = /^#[0-9A-Fa-f]{6}$/;
+
 type Props = {
   parfumId?: number; // varsa düzenleme, yoksa ekleme
   onBitti: () => void; // kaydedilince ya da vazgeçilince
@@ -31,9 +35,15 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
   const [ad, setAd] = useState("");
   const [markaId, setMarkaId] = useState(0);
   const [cinsiyet, setCinsiyet] = useState<Cinsiyet>("Unisex");
+  const [renk, setRenk] = useState("");
   const [secili, setSecili] = useState<SeciliNota[]>([]);
   const [hata, setHata] = useState("");
   const [gonderiliyor, setGonderiliyor] = useState(false);
+  const [yeniId, setYeniId] = useState<number | null>(null);
+  const [gorselUrl, setGorselUrl] = useState<string | null>(null);
+  const [gorselYukleniyor, setGorselYukleniyor] = useState(false);
+
+  const duzenlemeId = parfumId ?? yeniId;
 
   useEffect(() => {
     Promise.all([
@@ -48,11 +58,36 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
           setAd(p.ad);
           setMarkaId(p.markaId);
           setCinsiyet(p.cinsiyet);
+          setRenk(p.renk ?? "");
           setSecili(p.notalar.map((x) => ({ notaId: x.notaId, katman: x.katman })));
+          setGorselUrl(p.gorselUrl);
         }
       })
       .catch((e) => setHata(e.message));
   }, [parfumId]);
+
+  async function gorselYukle(e: ChangeEvent<HTMLInputElement>) {
+    const dosya = e.target.files?.[0];
+    if (!dosya || !duzenlemeId) return;
+    setHata("");
+    setGorselYukleniyor(true);
+    try {
+      const veri = new FormData();
+      veri.append("dosya", dosya);
+      const sonuc = await apiIstek<{ gorselUrl: string; renk: string | null }>(
+        `/api/parfumler/${duzenlemeId}/gorsel`,
+        token,
+        { method: "POST", body: veri }
+      );
+      setGorselUrl(sonuc.gorselUrl);
+      if (sonuc.renk) setRenk(sonuc.renk);
+    } catch (err) {
+      setHata((err as Error).message);
+    } finally {
+      setGorselYukleniyor(false);
+      e.target.value = "";
+    }
+  }
 
   const notaAdi = (id: number) => notalar.find((n) => n.id === id)?.ad ?? "?";
   const secilebilir = notalar.filter((n) => !secili.some((s) => s.notaId === n.id));
@@ -62,11 +97,19 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
     setHata("");
     setGonderiliyor(true);
     try {
-      await apiIstek(parfumId ? `/api/parfumler/${parfumId}` : "/api/parfumler", token, {
-        method: parfumId ? "PUT" : "POST",
-        body: JSON.stringify({ ad, markaId, cinsiyet, notalar: secili }),
-      });
-      onBitti();
+      if (parfumId) {
+        await apiIstek(`/api/parfumler/${parfumId}`, token, {
+          method: "PUT",
+          body: JSON.stringify({ ad, markaId, cinsiyet, notalar: secili, renk: HEX_DESENI.test(renk) ? renk : null }),
+        });
+        onBitti();
+      } else {
+        const sonuc = await apiIstek<ParfumDetayVeri>("/api/parfumler", token, {
+          method: "POST",
+          body: JSON.stringify({ ad, markaId, cinsiyet, notalar: secili, renk: HEX_DESENI.test(renk) ? renk : null }),
+        });
+        setYeniId(sonuc.id);
+      }
     } catch (err) {
       setHata((err as Error).message);
     } finally {
@@ -78,7 +121,7 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
     <form onSubmit={kaydet} className="space-y-5 rounded-lg border border-cizgi bg-white p-5">
       <h2 className="font-baslik text-2xl">{parfumId ? "Parfümü düzenle" : "Yeni parfüm"}</h2>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <fieldset disabled={!!yeniId} className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm">
           Parfüm adı
           <input value={ad} onChange={(e) => setAd(e.target.value)} required className={`${ALAN} mt-1`} />
@@ -104,9 +147,29 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
             ))}
           </select>
         </label>
-      </div>
+        <label className="text-sm">
+          Renk (isteğe bağlı)
+          <span className="mt-1 flex items-center gap-2">
+            <input
+              type="color"
+              value={HEX_DESENI.test(renk) ? renk : VARSAYILAN_RENK}
+              onChange={(e) => setRenk(e.target.value)}
+              aria-label="Parfüm rengi"
+              className="h-10 w-12 shrink-0 cursor-pointer rounded-md border border-cizgi bg-white p-1"
+            />
+            <input
+              value={renk}
+              onChange={(e) => setRenk(e.target.value)}
+              placeholder={VARSAYILAN_RENK}
+              maxLength={7}
+              className={ALAN}
+            />
+          </span>
+          {renk && !HEX_DESENI.test(renk) && <span className="mt-1 block text-xs text-red-700">#RRGGBB biçiminde olmalı.</span>}
+        </label>
+      </fieldset>
 
-      <fieldset className="space-y-3">
+      <fieldset disabled={!!yeniId} className="space-y-3">
         <legend className="mb-2 text-sm">Notalar</legend>
         {KATMANLAR.map((k) => (
           <div key={k.deger} className="flex flex-wrap items-center gap-2">
@@ -144,15 +207,46 @@ export default function ParfumFormu({ parfumId, onBitti }: Props) {
         ))}
       </fieldset>
 
+      <label className="block text-sm">
+        Görsel
+        {duzenlemeId ? (
+          <span className="mt-1 flex items-center gap-3">
+            {gorselUrl && (
+              <img src={gorselAdresi(gorselUrl) ?? undefined} alt="" className="h-14 w-14 rounded-md border border-cizgi object-cover" />
+            )}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={gorselYukle}
+              disabled={gorselYukleniyor}
+              className="block text-sm"
+            />
+          </span>
+        ) : (
+          <span className="mt-1 block text-xs text-buhar">Önce parfümü kaydet, sonra görsel ekleyebilirsin.</span>
+        )}
+      </label>
+
       <HataMesaji mesaj={hata} />
 
       <div className="flex items-center gap-4">
-        <button type="submit" disabled={gonderiliyor} className={BUTON}>
-          {gonderiliyor ? "Kaydediliyor..." : parfumId ? "Değişiklikleri kaydet" : "Parfümü ekle"}
-        </button>
-        <button type="button" onClick={onBitti} className={BUTON_SADE}>
-          Vazgeç
-        </button>
+        {yeniId ? (
+          <>
+            <span className="text-sm text-green-700">Parfüm kaydedildi.</span>
+            <button type="button" onClick={onBitti} className={BUTON}>
+              Bitti
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="submit" disabled={gonderiliyor} className={BUTON}>
+              {gonderiliyor ? "Kaydediliyor..." : parfumId ? "Değişiklikleri kaydet" : "Parfümü ekle"}
+            </button>
+            <button type="button" onClick={onBitti} className={BUTON_SADE}>
+              Vazgeç
+            </button>
+          </>
+        )}
       </div>
     </form>
   );
