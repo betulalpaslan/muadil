@@ -39,10 +39,18 @@ export interface ParfumListe {
   muadilOzetleri: MuadilOzet[];
 }
 
+export interface Nota {
+  id: number;
+  ad: string;
+  gorselUrl: string | null;
+  aciklama: string | null;
+}
+
 export interface ParfumNota {
   notaId: number;
   notaAd: string;
   katman: NotaKatmani;
+  gorselUrl?: string | null;
 }
 
 export interface Muadil {

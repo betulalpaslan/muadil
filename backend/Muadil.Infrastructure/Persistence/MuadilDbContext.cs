@@ -22,6 +22,7 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
         modelBuilder.Entity<Nota>(e =>
         {
             e.Property(x => x.Ad).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Aciklama).HasMaxLength(500);
             e.HasIndex(x => x.Ad).IsUnique();
         });
 

@@ -37,7 +37,7 @@ export default function AdminSayfasi() {
       <div className="mt-6">
         {sekme === "parfumler" && <ParfumYonetimi />}
         {sekme === "markalar" && <SozlukYonetimi uc="/api/markalar" tekil="marka" turlu gorselli />}
-        {sekme === "notalar" && <SozlukYonetimi uc="/api/notalar" tekil="nota" />}
+        {sekme === "notalar" && <SozlukYonetimi uc="/api/notalar" tekil="nota" gorselli gorselAdi="Görsel" topluGorsel aciklamali />}
         {sekme === "toplu" && <TopluYukleme />}
       </div>
       </div>

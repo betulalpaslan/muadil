@@ -3,7 +3,11 @@ import { useAuth } from "react-oidc-context";
 import AdminSayfasi from "./components/admin/AdminSayfasi";
 import { Header } from "./components/OrtakYerlesim";
 import AnaSayfa from "./components/AnaSayfa";
+import BlogYazisi from "./components/BlogYazisi";
+import NotalarSayfasi from "./components/NotalarSayfasi";
 import ParfumDetay from "./components/ParfumDetay";
+import ParfumlerSayfasi from "./components/ParfumlerSayfasi";
+import { ONE_CIKAN_BLOG } from "./tasarim/blogOrnek";
 
 function tokenIcerigi(token: string) {
   const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
@@ -27,7 +31,10 @@ export default function App() {
       <Header adminMi={adminMi} />
       <Routes>
         <Route path="/" element={<AnaSayfa />} />
+        <Route path="/parfumler" element={<ParfumlerSayfasi />} />
+        <Route path="/notalar" element={<NotalarSayfasi />} />
         <Route path="/parfum/:id" element={<ParfumDetay adminMi={adminMi} />} />
+        <Route path={ONE_CIKAN_BLOG.yol} element={<BlogYazisi />} />
         <Route
           path="/admin"
           element={

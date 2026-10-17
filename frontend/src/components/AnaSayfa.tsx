@@ -1,13 +1,14 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { apiIstek } from "../api/client";
 import { gorselAdresi } from "../gorsel";
 import { tl } from "../para";
-import { ONE_CIKAN_BLOG, SON_YAZILAR } from "../tasarim/blogOrnek";
+import { ONE_CIKAN_BLOG, ZARA_SISELER } from "../tasarim/blogOrnek";
 import { pastel } from "../tasarim/renk";
 import type { ParfumListe } from "../types";
 import { Footer } from "./OrtakYerlesim";
 import Asterisk from "./tasarim/Asterisk";
+import BlogKapak from "./tasarim/BlogKapak";
 import Cerceve from "./tasarim/Cerceve";
 import KayanSerit from "./tasarim/KayanSerit";
 import ParfumSisesi from "./tasarim/ParfumSisesi";
@@ -16,7 +17,7 @@ import type { PopulerParfum } from "./tasarim/PopulerSekmeler";
 import YildizPatlamasi from "./tasarim/YildizPatlamasi";
 import { HataMesaji } from "./ui";
 
-// Ana sayfa: blogda öne çıkan, kayan şerit, bu hafta en popüler, blog bandı, sevdiğin koku. TASARIM.md §5.
+// Ana sayfa: blogda öne çıkan, kayan şerit, bu hafta en popüler, sevdiğin koku. TASARIM.md §5.
 
 function Ok({ boyut = 12 }: { boyut?: number }) {
   return (
@@ -26,70 +27,40 @@ function Ok({ boyut = 12 }: { boyut?: number }) {
   );
 }
 
-function OkDairesi({ boyut = 44 }: { boyut?: number }) {
+// beyazZemin: sabit beyaz sahnenin (BlogKapak) üstünde tema renkleri kaybolur; renkler sabit verilir.
+function OkDairesi({ boyut = 44, beyazZemin = false }: { boyut?: number; beyazZemin?: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center justify-center rounded-full border-2 border-yazi bg-vurgu"
+      className={`inline-flex shrink-0 items-center justify-center rounded-full border-2 ${beyazZemin ? "border-black bg-[#7a6548]" : "border-yazi bg-vurgu"}`}
       style={{ width: boyut, height: boyut }}
     >
       <svg width={boyut * 0.4} height={boyut * 0.4} viewBox="0 0 20 20">
-        <path d="M5 15L15 5M7 5h8v8" fill="none" strokeWidth={2.6} strokeLinecap="square" style={{ stroke: "var(--si)" }} />
+        <path d="M5 15L15 5M7 5h8v8" fill="none" strokeWidth={2.6} strokeLinecap="square" style={{ stroke: beyazZemin ? "#fff" : "var(--si)" }} />
       </svg>
     </span>
   );
 }
 
-function Rozet() {
-  const id = useId();
-  return (
-    <svg className="rozet-don" width="96" height="96" viewBox="0 0 100 100" aria-hidden="true">
-      <defs>
-        <path id={id} d="M50 50 m-40 0 a40 40 0 1 1 80 0 a40 40 0 1 1 -80 0" />
-      </defs>
-      <circle cx="50" cy="50" r="31" fill="none" strokeWidth={1.2} style={{ stroke: "var(--be)" }} />
-      <text style={{ fill: "var(--be)", fontFamily: "var(--font-govde)", fontSize: "7.4px", fontWeight: 700, letterSpacing: "1.6px", textTransform: "uppercase" }}>
-        <textPath href={`#${id}`}>kodunu bul ✦ kodunu bul ✦ kodunu bul ✦ </textPath>
-      </text>
-    </svg>
-  );
-}
-
 function BlogdaOneCikan() {
   return (
-    <section aria-label="Blogda öne çıkan" className="flex flex-wrap items-start gap-[clamp(30px,6vw,80px)] px-[clamp(16px,5vw,70px)] pt-[70px] pb-[60px]">
-      <div className="relative min-w-0 flex-1 basis-[380px] max-w-[470px]">
-        <Cerceve sol={`${ONE_CIKAN_BLOG.marka.toLowerCase()} · liste`} sag="no. 01">
-          <div className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-vurgu">
-            <ParfumSisesi genislik={200} govde="var(--si)" parlak="var(--ta)" />
-          </div>
-        </Cerceve>
-        <Asterisk boyut={76} className="absolute top-[46px] left-[max(-34px,-2vw)] z-[3]" />
-        <span className="absolute bottom-10 left-[max(-30px,-2vw)] z-[3] text-[22px] font-medium tracking-[0.04em] max-[760px]:hidden">
-          {ONE_CIKAN_BLOG.sayi}
-        </span>
-      </div>
-      <div className="flex min-w-0 flex-1 basis-[380px] flex-col gap-[34px] pt-1">
-        <div className="flex items-center justify-between">
-          <span className="flex gap-1.5" aria-label="Bargello, Mad, Muscent">
-            <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-yazi text-[8px] font-extrabold text-zemin">B</span>
-            <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-[1.5px] border-yazi text-[8px] font-extrabold">M</span>
-            <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-[1.5px] border-yazi text-[8px] font-extrabold">M</span>
-          </span>
-          <span className="text-[13px] font-bold tracking-[0.08em]">01</span>
-        </div>
-        <h1 className="genis m-0 text-[clamp(30px,3.6vw,48px)] leading-[1.45] [word-spacing:.2em]">
-          En iyi <span className="font-extrabold">{ONE_CIKAN_BLOG.sayi}</span>
-          <br />
-          <span className="text-vurgu">{ONE_CIKAN_BLOG.marka}</span> {ONE_CIKAN_BLOG.baslikSonu}
-          <br />
-          {ONE_CIKAN_BLOG.soru}{" "}
-          <a href="#" aria-label="Yazıyı oku" className="ml-2 inline-flex align-middle">
-            <OkDairesi />
-          </a>
-        </h1>
-        <p className="m-0 max-w-[470px] text-sm leading-[1.75] tracking-[0.03em] text-justify">{ONE_CIKAN_BLOG.aciklama}</p>
-        <span className="kucuk text-vurgu">{ONE_CIKAN_BLOG.etiket}</span>
+    <section aria-label="Blogda öne çıkan" className="px-[clamp(16px,5vw,70px)] pt-[44px] pb-8">
+      <div className="relative">
+        <BlogKapak
+          ad="Zara parfümleri"
+          sise={ZARA_SISELER}
+          baslik={
+            <h1 className="genis m-0 text-[clamp(22px,2.6vw,34px)] leading-[1.3] [word-spacing:.2em]">
+              <Link to={ONE_CIKAN_BLOG.yol} aria-label={`${ONE_CIKAN_BLOG.marka} ${ONE_CIKAN_BLOG.baslik}, yazıyı oku`} className="inline-flex items-center gap-5 text-black no-underline">
+                <span>
+                  <span className="text-[#7a6548]">{ONE_CIKAN_BLOG.marka}</span> {ONE_CIKAN_BLOG.baslik}
+                </span>
+                <OkDairesi beyazZemin />
+              </Link>
+            </h1>
+          }
+        />
+        <Asterisk boyut={40} className="absolute -top-[44px] left-0 z-[3]" />
       </div>
     </section>
   );
@@ -155,18 +126,8 @@ function BuHaftaEnPopuler({ populerler, toplamSayi }: { populerler: ParfumListe[
   }));
 
   return (
-    <section aria-label="En popüler parfümler" className="relative px-[clamp(16px,5vw,70px)] pt-[70px] pb-20">
-      <div className="mb-[30px] flex flex-wrap items-end justify-between gap-4">
-        <h2 className="genis m-0 text-[clamp(30px,3.6vw,48px)] leading-[1.3] [word-spacing:.2em]">
-          <span className="text-vurgu">Bu hafta</span>
-          <br />
-          <span className="font-extrabold">en</span> popüler
-        </h2>
-        <div className="flex items-center gap-[18px]">
-          <span className="kucuk text-soluk max-[760px]:hidden">{populerler.length} parfüm · sekmeye dokun</span>
-          <Rozet />
-        </div>
-      </div>
+    <section aria-label="En popüler parfümler" className="relative px-[clamp(16px,5vw,70px)] pt-6 pb-14">
+      <p className="kucuk m-0 mb-3 text-right text-soluk max-[760px]:hidden">{populerler.length} parfüm · sekmeye dokun</p>
 
       {populerVeri.length === 0 ? (
         <p className="text-sm">Henüz parfüm eklenmedi.</p>
@@ -174,45 +135,10 @@ function BuHaftaEnPopuler({ populerler, toplamSayi }: { populerler: ParfumListe[
         <PopulerSekmeler parfumler={populerVeri} />
       )}
 
-      <div className="mt-10 flex justify-center">
-        <Link to="/?ara=" className="cizgili kucuk inline-flex min-h-12 items-center gap-3 rounded-full border-[1.5px] border-yazi px-7">
+      <div className="mt-8 flex justify-center">
+        <Link to="/parfumler" className="cizgili kucuk inline-flex min-h-12 items-center gap-3 rounded-full border-[1.5px] border-yazi px-7">
           tüm parfümler ({toplamSayi}) <Ok />
         </Link>
-      </div>
-    </section>
-  );
-}
-
-function BlogBandi() {
-  return (
-    <section aria-label="Blog" className="bg-yazi px-[clamp(16px,5vw,70px)] pt-[70px] pb-[76px] text-zemin">
-      <div className="mb-[34px] flex flex-wrap items-end justify-between gap-4">
-        <h2 className="genis m-0 text-[clamp(30px,3.6vw,48px)] leading-[1.3] [word-spacing:.2em]">
-          Blogdan
-          <br />
-          <span className="font-extrabold">son</span> yazılar
-        </h2>
-        <a href="#" className="kucuk inline-flex min-h-11 items-center gap-2.5 rounded-full border-[1.5px] border-zemin px-6">
-          tümü <Ok />
-        </a>
-      </div>
-      <div className="grid gap-[clamp(20px,3vw,40px)]" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
-        {SON_YAZILAR.map((y, i) => (
-          <a key={i} href="#" className="flex flex-col gap-4 text-zemin no-underline">
-            <Cerceve ters sol={y.kategori} sag={`no. ${String(i + 2).padStart(2, "0")}`}>
-              <div className="flex aspect-[4/3] items-center justify-center bg-yuzey">
-                <span className="kucuk text-[8px] text-soluk">görsel</span>
-              </div>
-            </Cerceve>
-            <span className="kucuk text-[9px] text-vurgu-ters">
-              {y.kategori} · {y.sure}
-            </span>
-            <span className="genis text-[19px] leading-[1.35] tracking-[0.08em]">{y.baslik}</span>
-            <span className="kucuk inline-flex items-center gap-2 text-[9px]">
-              oku <Ok boyut={10} />
-            </span>
-          </a>
-        ))}
       </div>
     </section>
   );
@@ -247,7 +173,7 @@ function SevdiginKoku() {
             Parfümün adını, markasını ya da elindeki muadil kodunu yaz. Bargello, Mad ve Muscent'teki karşılıklarını
             fiyatlarıyla birlikte gösterelim.
           </p>
-          <Link to="/?ara=" className="cizgili kucuk inline-flex min-h-12 w-fit items-center gap-3 rounded-full border-[1.5px] border-yazi px-7">
+          <Link to="/parfumler" className="cizgili kucuk inline-flex min-h-12 w-fit items-center gap-3 rounded-full border-[1.5px] border-yazi px-7">
             tüm parfümler <Ok />
           </Link>
         </div>
@@ -282,7 +208,6 @@ export default function AnaSayfa() {
 
       {!aramaAktif && <BuHaftaEnPopuler populerler={populerler} toplamSayi={parfumler.length} />}
 
-      <BlogBandi />
       <SevdiginKoku />
 
       <HataMesaji mesaj={hata} />

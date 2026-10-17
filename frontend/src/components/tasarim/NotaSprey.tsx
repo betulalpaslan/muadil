@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { gorselAdresi } from "../../gorsel";
 import type { NotaKatmani, ParfumNota } from "../../types";
 import ParfumSisesi, { DELIK } from "./ParfumSisesi";
 
@@ -17,12 +18,22 @@ const KATMANLAR: { katman: NotaKatmani; baslik: string; basla: number }[] = [
 const SISE_GENISLIK = 56;
 const PARILTI_SAYISI = 72;
 
-// Katmanlar aşağı indikçe genişler; böylece liste bir koku piramidinin kesitini andırır.
+// Her nota 88px'lik bir sütun (ikon + ad). Katmanlar aşağı indikçe genişler (2, 3, 4 nota yan yana);
+// böylece liste bir koku piramidinin kesitini andırır.
 const PIRAMIT_GENISLIK: Record<NotaKatmani, string> = {
-  Ust: "max-w-[180px]",
-  Orta: "max-w-[280px]",
-  Alt: "max-w-[380px]",
+  Ust: "max-w-[182px]",
+  Orta: "max-w-[276px]",
+  Alt: "max-w-[370px]",
 };
+
+// Görseli olmayan nota için marka yıldızı; sütunlar hizalı kalsın.
+export function NotaYildizi({ boyut }: { boyut: number }) {
+  return (
+    <svg width={boyut * 0.5} height={boyut * 0.5} viewBox="0 0 24 24" aria-hidden="true" style={{ margin: boyut * 0.25, opacity: 0.7 }}>
+      <path d="M12 1Q12 12 23 12Q12 12 12 23Q12 12 1 12Q12 12 12 1Z" fill="currentColor" />
+    </svg>
+  );
+}
 
 type Puf = 0 | 1 | 2; // 0 yok, 1 fışkırma, 2 dökülme
 
@@ -30,7 +41,22 @@ function hareketAzaltilsin() {
   return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 }
 
-export default function NotaSprey({ notalar }: { notalar: ParfumNota[] }) {
+// Katman bilgisi olmayan notalar (blog yazıları) için tek grup.
+const DUZ_KATMAN = { katman: "Orta" as NotaKatmani, baslik: "başlıca notalar", basla: 0.15 };
+
+// duz: notaların katmanı yok; hepsi tek grupta, piramit yerine düz liste olarak gösterilir.
+// panel: ters renkli (bg-yazi text-zemin) bir kutunun içinde kullanılır; şişe, vurgu ve parıltı renkleri tersine
+// çevrilir, yazılar küçülür (blog okuma sayfasındaki bilgi paneli).
+export default function NotaSprey({
+  notalar,
+  duz = false,
+  panel = false,
+}: {
+  notalar: ParfumNota[];
+  duz?: boolean;
+  panel?: boolean;
+}) {
+  const vurgu = panel ? "text-vurgu-ters" : "text-vurgu";
   const [gorunur, setGorunur] = useState(false); // harfler yerinde mi
   const [puf, setPuf] = useState<Puf>(0);
   const [basili, setBasili] = useState(false);
@@ -89,39 +115,55 @@ export default function NotaSprey({ notalar }: { notalar: ParfumNota[] }) {
     return x - Math.floor(x);
   };
 
+  // Sağdan uçarak yerine oturma: harfler de ikonlar da aynı hareketi kullanır
+  const ucusStili = (r1: number, r2: number, gecikme: string): CSSProperties =>
+    gorunur
+      ? {
+          display: "inline-block",
+          transform: "none",
+          opacity: 1,
+          filter: "blur(0)",
+          transition: `transform .9s cubic-bezier(.15,.75,.25,1) ${gecikme}s, opacity .45s ease ${gecikme}s, filter .9s ease ${gecikme}s`,
+        }
+      : {
+          display: "inline-block",
+          transform: `translate(${Math.round(140 + r1 * 120)}px, ${Math.round(-60 + r2 * 60)}px) rotate(${Math.round(r1 * 160 - 80)}deg) scale(.4)`,
+          opacity: 0,
+          filter: "blur(4px)",
+          transition: "none",
+        };
+
   let sayi = 0;
-  const katmanlar = KATMANLAR.map((k) => {
+  const katmanlar = (duz ? [DUZ_KATMAN] : KATMANLAR).map((k) => {
     let sira = 0;
     const kelimeler = notalar
-      .filter((n) => n.katman === k.katman)
-      .map((n) => ({
-        id: n.notaId,
-        ad: n.notaAd,
-        harfler: Array.from(n.notaAd).map((c) => {
+      .filter((n) => duz || n.katman === k.katman)
+      .map((n) => {
+        // İkon, adın ilk harfiyle aynı tohumdan beslenir; ikonla ad birlikte gelir
+        const ilk = sayi + 1;
+        const ikonStil = ucusStili(rasgele(ilk), rasgele(ilk + 99), (k.basla + (sira + 1) * 0.028 + rasgele(ilk + 199) * 0.12).toFixed(3));
+        const harfler = Array.from(n.notaAd).map((c) => {
           sayi += 1;
           sira += 1;
           const r1 = rasgele(sayi), r2 = rasgele(sayi + 99), r3 = rasgele(sayi + 199);
           const gecikme = (k.basla + sira * 0.028 + r3 * 0.12).toFixed(3);
-          const stil: CSSProperties = gorunur
-            ? {
-                display: "inline-block",
-                transform: "none",
-                opacity: 1,
-                filter: "blur(0)",
-                transition: `transform .9s cubic-bezier(.15,.75,.25,1) ${gecikme}s, opacity .45s ease ${gecikme}s, filter .9s ease ${gecikme}s`,
-              }
-            : {
-                display: "inline-block",
-                transform: `translate(${Math.round(140 + r1 * 120)}px, ${Math.round(-60 + r2 * 60)}px) rotate(${Math.round(r1 * 160 - 80)}deg) scale(.4)`,
-                opacity: 0,
-                filter: "blur(4px)",
-                transition: "none",
-              };
-          return { c: c === " " ? " " : c, stil };
-        }),
-      }));
+          return { c, bosluk: c === " ", stil: ucusStili(r1, r2, gecikme) };
+        });
+        // Dar sütunda alt satıra geçebilsin diye ad kelimelere bölünür
+        const adKelimeleri = harfler.reduce<(typeof harfler)[]>(
+          (liste, h) => {
+            if (h.bosluk) liste.push([]);
+            else liste[liste.length - 1].push(h);
+            return liste;
+          },
+          [[]]
+        );
+        return { id: n.notaId, ad: n.notaAd, gorsel: gorselAdresi(n.gorselUrl ?? null), ikonStil, adKelimeleri };
+      });
     return { ...k, kelimeler };
   }).filter((k) => k.kelimeler.length > 0);
+
+  const ikonBoyut = panel ? 44 : 52;
 
   const parlamalar = Array.from({ length: PARILTI_SAYISI }, (_, i) => {
     const aci = ((180 + (rasgele(i + 500) - 0.5) * 70 - 6) * Math.PI) / 180;
@@ -148,7 +190,7 @@ export default function NotaSprey({ notalar }: { notalar: ParfumNota[] }) {
       height: boy,
       borderRadius: "50%",
       pointerEvents: "none",
-      background: acik ? "var(--p1)" : "var(--p2)",
+      background: panel ? (acik ? "var(--p1t)" : "var(--p2t)") : acik ? "var(--p1)" : "var(--p2)",
       boxShadow: `0 0 3px .5px ${acik ? "rgba(175,182,191,.9)" : "rgba(140,147,156,.7)"}`,
       opacity: puf === 1 ? 0.95 : 0,
       transform: `translate(${tx.toFixed(0)}px, ${ty.toFixed(0)}px)`,
@@ -161,12 +203,15 @@ export default function NotaSprey({ notalar }: { notalar: ParfumNota[] }) {
 
   return (
     <section ref={bolum} aria-labelledby="notalar-baslik" className="flex flex-col">
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center gap-3 ${panel ? "justify-center" : ""}`}>
         <div className="flex flex-col gap-1.5">
-          <h2 id="notalar-baslik" className="genis text-[clamp(30px,3.6vw,48px)] font-extrabold [word-spacing:.3em]">
+          <h2
+            id="notalar-baslik"
+            className={`genis m-0 font-extrabold [word-spacing:.3em] ${panel ? "text-[clamp(26px,2.8vw,36px)]" : "text-[clamp(30px,3.6vw,48px)]"}`}
+          >
             Notalar
           </h2>
-          <span className="kucuk text-vurgu">{sayac > 0 ? "tekrar sık" : "şişeye dokun"}</span>
+          <span className={`kucuk ${vurgu}`}>{sayac > 0 ? "tekrar sık" : "şişeye dokun"}</span>
         </div>
         <button
           type="button"
@@ -181,12 +226,18 @@ export default function NotaSprey({ notalar }: { notalar: ParfumNota[] }) {
           {!tiklandi && (
             <span
               aria-hidden="true"
-              className="kucuk absolute left-1/2 -top-5 -translate-x-1/2 whitespace-nowrap text-vurgu"
+              className={`kucuk absolute left-1/2 -top-5 -translate-x-1/2 whitespace-nowrap ${vurgu}`}
             >
               tıkla
             </span>
           )}
-          <ParfumSisesi genislik={SISE_GENISLIK} sikiliyor={basili} yildizlarSoluk={puf === 1} />
+          <ParfumSisesi
+            genislik={SISE_GENISLIK}
+            govde={panel ? "var(--si)" : undefined}
+            parlak={panel ? "var(--be)" : undefined}
+            sikiliyor={basili}
+            yildizlarSoluk={puf === 1}
+          />
           {/* Parıltı katmanı püskürtme deliğine sabitlenir */}
           <span
             aria-hidden="true"
@@ -200,22 +251,43 @@ export default function NotaSprey({ notalar }: { notalar: ParfumNota[] }) {
         </button>
       </div>
 
-      <div className="mt-3 max-w-[380px]">
+      <div className={`mt-3 max-w-[380px] ${panel ? "mx-auto w-full" : ""}`}>
         {katmanlar.map((k) => (
           <div key={k.katman} className="py-4 text-center">
-            <div className={`mx-auto flex flex-col items-center gap-2 ${PIRAMIT_GENISLIK[k.katman]}`}>
-              <span className="kucuk text-[9px] text-vurgu">[{k.baslik}]</span>
+            <div className={`mx-auto flex flex-col items-center gap-2 ${duz ? "max-w-[380px]" : PIRAMIT_GENISLIK[k.katman]}`}>
+              <span className={`kucuk ${panel ? "text-[11px]" : "text-[9px]"} ${vurgu}`}>[{k.baslik}]</span>
               {/* Ekran okuyucu için düz metin; animasyonlu harfler gizli */}
               <span className="sr-only">{k.kelimeler.map((w) => w.ad).join(", ")}</span>
-              <div className="flex flex-wrap justify-center gap-x-[18px]" aria-hidden="true">
+              <div className="flex flex-wrap justify-center gap-x-1.5 gap-y-4" aria-hidden="true">
                 {k.kelimeler.map((w) => (
-                  <span key={w.id} className="genis inline-flex text-[22px] leading-[1.4] whitespace-nowrap">
-                    {w.harfler.map((h, i) => (
-                      <span key={i} style={h.stil}>
-                        {h.c}
-                      </span>
-                    ))}
-                  </span>
+                  <div key={w.id} className="flex w-[88px] flex-col items-center gap-2">
+                    <span style={w.ikonStil} className="inline-flex">
+                      {w.gorsel ? (
+                        <img
+                          src={w.gorsel}
+                          alt=""
+                          loading="lazy"
+                          className={`block object-contain ${panel ? "nota-ikon-ters" : "nota-ikon"}`}
+                          style={{ width: ikonBoyut, height: ikonBoyut }}
+                        />
+                      ) : (
+                        <span className="inline-flex" style={{ width: ikonBoyut, height: ikonBoyut }}>
+                          <NotaYildizi boyut={ikonBoyut} />
+                        </span>
+                      )}
+                    </span>
+                    <span className="nota-ad flex flex-wrap justify-center gap-x-[.45em]">
+                      {w.adKelimeleri.map((kelime, ki) => (
+                        <span key={ki} className="inline-flex whitespace-nowrap">
+                          {kelime.map((h, i) => (
+                            <span key={i} style={h.stil}>
+                              {h.c}
+                            </span>
+                          ))}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>

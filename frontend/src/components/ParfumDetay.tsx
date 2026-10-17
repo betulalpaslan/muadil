@@ -88,7 +88,7 @@ function KopyalaDugmesi({ kod, fiyat }: { kod: string; fiyat: number }) {
       onClick={kopyala}
       className="cizgili flex min-h-14 flex-1 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-yazi bg-transparent text-yazi"
     >
-      <span className="text-[10px] tracking-[0.08em]" aria-live="polite">
+      <span className="text-base font-bold tracking-[0.04em]" aria-live="polite">
         {kopyalandi ? "kopyalandı ✓" : `${tl(fiyat)} · 50 ml`}
       </span>
     </button>
@@ -199,8 +199,8 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
 
   return (
     <article>
-      <section className="flex flex-col gap-5 px-[clamp(16px,5vw,70px)] pt-10 pb-4">
-        <div className="flex items-center justify-between">
+      <section className="flex flex-col items-center gap-5 px-[clamp(16px,5vw,70px)] pt-10 pb-4 text-center">
+        <div className="flex w-full items-center justify-between">
           <Link to="/" className="kucuk inline-flex min-h-11 items-center text-yazi no-underline">
             ← tüm parfümler
           </Link>
@@ -208,7 +208,7 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
         </div>
         <h1 className="genis m-0 text-[clamp(26px,3.2vw,42px)] leading-[1.15] font-extrabold [word-spacing:.2em]">{parfum.ad}</h1>
 
-        <div className="flex flex-wrap items-start gap-[clamp(24px,5vw,64px)]">
+        <div className="flex flex-wrap items-center justify-center gap-[clamp(24px,5vw,64px)]">
           <div className="relative min-w-0 flex-1 basis-[320px] max-w-[440px]">
             <Cerceve sol={`${parfum.marka} · ${parfum.ad}`} sag="no. 01">
               <div
@@ -225,7 +225,7 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
             <Asterisk boyut={76} className="absolute top-10 left-[max(-30px,-2vw)] z-[3]" />
           </div>
 
-          <div className="flex min-w-0 flex-1 basis-[380px] flex-col gap-5 overflow-hidden">
+          <div className="flex min-w-0 flex-1 basis-[380px] flex-col items-center gap-5 overflow-hidden text-center">
             <span className="kucuk inline-flex items-center gap-2.5">
               <span
                 className="h-[18px] w-[18px] rounded-full border-[1.5px] border-yazi"
@@ -253,12 +253,12 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
         ) : (
           <>
             {parfum.muadiller.length > 1 && (
-              <label className="mb-6 flex items-center gap-2.5 self-end text-sm font-bold text-yazi">
+              <label className="mb-6 flex items-center gap-3 self-end text-lg font-bold text-yazi">
                 Sırala
                 <select
                   value={olcut}
                   onChange={(e) => setOlcut(e.target.value as Olcut)}
-                  className="cizgili h-11 cursor-pointer rounded-full border-2 border-yazi bg-vurgu px-4 text-sm font-bold text-zemin normal-case"
+                  className="cizgili h-16 cursor-pointer rounded-full border-2 border-yazi bg-vurgu px-6 text-lg font-bold text-zemin normal-case"
                 >
                   {OLCUTLER.map((o) => (
                     <option key={o.deger} value={o.deger} className="bg-zemin text-yazi">
@@ -286,12 +286,13 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
                         {m.kod}
                       </span>
                     </span>
-                    <span className="kucuk flex items-center justify-between gap-2 text-[9px]">
-                      <span className="truncate">{m.marka}</span>
-                      <span className="shrink-0">
-                        benzerlik {m.benzerlikPuani} · kalıcılık {m.kalicilikPuani}
-                      </span>
-                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="kucuk truncate text-[9px]">{m.marka}</span>
+                      <ul className="m-0 list-none p-0 text-sm font-bold">
+                        <li>Benzerlik {m.benzerlikPuani}/10</li>
+                        <li>Kalıcılık {m.kalicilikPuani}/10</li>
+                      </ul>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <KopyalaDugmesi kod={m.kod} fiyat={m.fiyat} />

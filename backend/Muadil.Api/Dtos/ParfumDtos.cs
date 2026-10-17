@@ -11,7 +11,7 @@ public record ParfumListeDto(
     int Id, string Ad, string Marka, string? GorselUrl, string? Renk,
     int MuadilSayisi, decimal? EnUygunMuadil, List<MuadilOzetDto> MuadilOzetleri);
 
-public record ParfumNotaDto(int NotaId, string NotaAd, NotaKatmani Katman);
+public record ParfumNotaDto(int NotaId, string NotaAd, NotaKatmani Katman, string? GorselUrl);
 
 public record ParfumDetayDto(
     int Id, string Ad, Cinsiyet Cinsiyet, int MarkaId, string Marka, string? GorselUrl, string? Renk,

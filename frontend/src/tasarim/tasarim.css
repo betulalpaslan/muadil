@@ -25,6 +25,10 @@
   --gr2: #8a8580; /* soluk yazı */
   --p1: #d9dde2; /* parıltı açık */
   --p2: #a9aeb5; /* parıltı koyu */
+  --ikon-f: brightness(0) invert(0.93) sepia(0.08); /* nota ikonları: koyu mürekkep -> krem */
+  --ikon-ters-f: none; /* ters renkli kutuda (bg-yazi) ikonlar koyu kalır */
+  --p1t: #8f959d; /* ters renkli kutuda (bg-yazi) parıltı açık */
+  --p2t: #6b7178; /* ters renkli kutuda parıltı koyu */
   color-scheme: dark;
 }
 :root[data-tema="gunduz"] {
@@ -36,6 +40,10 @@
   --gr2: #6f6a64;
   --p1: #8f959d;
   --p2: #6b7178;
+  --ikon-f: none;
+  --ikon-ters-f: brightness(0) invert(0.93) sepia(0.08);
+  --p1t: #d9dde2;
+  --p2t: #a9aeb5;
   color-scheme: light;
 }
 
@@ -79,6 +87,22 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }
+/* Nota adı: ikonun altında, dar sütuna sığan küçük büyük harf */
+@utility nota-ad {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+/* Nota ikonları koyu mürekkeple çizilmiş şeffaf PNG; temaya göre boyanır (CORS gerektirmesin diye mask değil filtre).
+   -ters: ters renkli kutuda (bg-yazi) tersi. */
+@utility nota-ikon {
+  filter: var(--ikon-f);
+}
+@utility nota-ikon-ters {
+  filter: var(--ikon-ters-f);
+}
 /* Çizgili hap/daire: hover'da içi dolar */
 @utility cizgili {
   transition:
@@ -106,24 +130,12 @@
     transform: translateX(-50%);
   }
 }
-@keyframes don {
-  to {
-    transform: rotate(360deg);
-  }
-}
 @utility serit-kay {
   animation: kay 40s linear infinite;
   @media (prefers-reduced-motion: reduce) {
     animation: none;
   }
 }
-@utility rozet-don {
-  animation: don 24s linear infinite;
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-}
-
 @keyframes sallan {
   0%,
   100% {
@@ -157,5 +169,78 @@
   }
   @media (prefers-reduced-motion: reduce) {
     animation: none;
+  }
+}
+
+/* Blog kapağı (BlogKapak). İki katman: sise-yer şişeyi bulunduğu yuvaya oturtur (öne gelince yer değiştirir),
+   sise-egim imleçle birlikte çok hafif kayıp eğilir. Şişe silindir olduğu için yelpaze açısı yok: düz fotoğrafı
+   perspektifte döndürmek kapağın üst kenarını yamultur; derinlik boyut ve yükseklik farkıyla verilir.
+   Değişkenler: --slot yuva, --home ilk yuva, --w/--g şişe genişliği ve aralık (sahneden), --s ölçek,
+   --y yükseklik farkı, --d kayma gücü (px), --px/--py imleç konumu (-1..1, sahneden), --i sıra. */
+@utility sise-yer {
+  transform-origin: 50% 100%;
+  transform: translate3d(calc((var(--slot, 0) - var(--home, 0)) * (var(--w, 0px) + var(--g, 0px))), var(--y, 0px), 0)
+    scale(var(--s, 1));
+  transition: transform 0.6s cubic-bezier(0.22, 0.8, 0.25, 1);
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+@utility sise-egim {
+  transform-origin: 50% 100%;
+  transform: perspective(2400px) translate3d(calc(var(--px, 0) * var(--d, 0) * 1px), 0, 0)
+    rotateY(calc(var(--px, 0) * -3deg)) rotateX(calc(var(--py, 0) * 1.5deg));
+  transition: transform 0.3s ease-out;
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+    transition: none;
+  }
+}
+@keyframes yuz {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+@keyframes golge-nefes {
+  0%,
+  100% {
+    scale: 1;
+    opacity: 0.3;
+  }
+  50% {
+    scale: 0.86;
+    opacity: 0.18;
+  }
+}
+/* Şişe havada süzülür; her şişe farklı evrede (negatif gecikme). Gölge aynı ritimde küçülüp büyür. */
+@utility sise-yuz {
+  animation: yuz 5.5s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -1.1s);
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@utility sise-golge {
+  animation: golge-nefes 5.5s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -1.1s);
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+/* Camın üstünden geçen parlama: şişenin kendi şeklinde maskelenir (mask-image bileşenden gelir); şişe öne
+   gelince bileşen konumu 0%'a çekip geçişi açar, ayrılınca geçişsiz başa döner. */
+@utility sise-parilti {
+  background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 0.9) 50%, transparent 62%) no-repeat;
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  mix-blend-mode: soft-light;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
   }
 }

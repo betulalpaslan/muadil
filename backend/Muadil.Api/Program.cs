@@ -55,6 +55,7 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<MuadilDbContext>();
     await SeedData.LoadAsync(db);
+    await NotaAciklamalari.DoldurAsync(db);
 }
 
 app.UseStaticFiles(new StaticFileOptions

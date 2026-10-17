@@ -84,7 +84,9 @@ export function Header({ adminMi }: { adminMi: boolean }) {
   const { orijinal, muadil } = useKatalogSayilari();
   const auth = useAuth();
   const location = useLocation();
-  const anaSayfaAktif = location.pathname === "/" || location.pathname.startsWith("/parfum");
+  const parfumlerAktif = location.pathname === "/parfumler";
+  const notalarAktif = location.pathname === "/notalar";
+  const anaSayfaAktif = location.pathname === "/" || location.pathname.startsWith("/parfum/");
   const yonetimAktif = location.pathname.startsWith("/admin");
 
   return (
@@ -105,15 +107,12 @@ export function Header({ adminMi }: { adminMi: boolean }) {
         <Link to="/" aria-current={anaSayfaAktif ? "page" : undefined} className={anaSayfaAktif ? MENU_HAP : MENU_LINK}>
           ana sayfa
         </Link>
-        <span className={MENU_PASIF} aria-disabled="true">
+        <Link to="/parfumler" aria-current={parfumlerAktif ? "page" : undefined} className={parfumlerAktif ? MENU_HAP : MENU_LINK}>
           parfümler
-        </span>
-        <span className={MENU_PASIF} aria-disabled="true">
-          markalar
-        </span>
-        <span className={MENU_PASIF} aria-disabled="true">
+        </Link>
+        <Link to="/notalar" aria-current={notalarAktif ? "page" : undefined} className={notalarAktif ? MENU_HAP : MENU_LINK}>
           notalar
-        </span>
+        </Link>
         <span className={MENU_PASIF} aria-disabled="true">
           blog
         </span>

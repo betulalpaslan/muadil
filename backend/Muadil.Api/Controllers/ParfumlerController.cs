@@ -52,7 +52,7 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
                 p.Id, p.Ad, p.Cinsiyet, p.MarkaId, p.Marka.Ad, p.GorselUrl, p.Renk,
                 p.Notalar
                     .OrderBy(pn => pn.Katman).ThenBy(pn => pn.Nota.Ad)
-                    .Select(pn => new ParfumNotaDto(pn.NotaId, pn.Nota.Ad, pn.Katman))
+                    .Select(pn => new ParfumNotaDto(pn.NotaId, pn.Nota.Ad, pn.Katman, pn.Nota.GorselUrl))
                     .ToList(),
                 p.Muadiller
                     .OrderByDescending(m => m.BenzerlikPuani).ThenBy(m => m.Fiyat)

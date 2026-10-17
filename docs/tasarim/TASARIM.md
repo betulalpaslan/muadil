@@ -23,8 +23,8 @@ Bu klasördekiler:
 | Düğme | Hap (`rounded-full`) ya da daire. Çizgili olanlar `cizgili` ile hover'da dolar; ana düğme dolu. |
 | Görsel | `Cerceve`: düz, eğik değil, tırtık yok. Kenarlarda 14px pay, altta etiket satırı ("SAUVAGE ... NO. 02"). |
 | Numara | Bölüm ve kartlarda "01, 02, 03..." küçük kalın rakamlar dergi havası verir. |
-| Süsler | Yıldız işareti (asterisk), yıldız patlaması, dönen yazılı rozet, yukarı ok. Hepsi `aria-hidden`, telefonda bir kısmı gizlenir. |
-| Hareket | Rozet döner, şerit kayar, şişe animasyonu var. Hepsi `prefers-reduced-motion` ile kapanır. |
+| Süsler | Yıldız işareti (asterisk), yıldız patlaması, yukarı ok. Hepsi `aria-hidden`, telefonda bir kısmı gizlenir. |
+| Hareket | Şerit kayar, şişe animasyonu var. Hepsi `prefers-reduced-motion` ile kapanır. |
 
 ## 2. Tema (gece / gündüz)
 
@@ -40,7 +40,7 @@ Renkler CSS değişkeni; `<html data-tema="gunduz">` gündüzü açar. Tailwind 
 | `soluk` | `--gr2` | #8A8580 | #6F6A64 | ikincil yazı |
 | — | `--p1` / `--p2` | açık gümüş | koyu gümüş | şişe parıltıları |
 
-Gündüzde zemin ve yazı yer değiştirir. Gecede krem olan "ters bantlar" (popüler paneli, blog bandı, çerçeveler) gündüzde koyu olur. Bu bilinçli bir tercih, iki temada da sayfanın ritmi aynı kalsın diye.
+Gündüzde zemin ve yazı yer değiştirir. Gecede krem olan "ters bantlar" (popüler paneli, çerçeveler) gündüzde koyu olur. Bu bilinçli bir tercih, iki temada da sayfanın ritmi aynı kalsın diye.
 
 - **Seçim:** `useTema` önce localStorage'daki seçimi, yoksa sistemin `prefers-color-scheme` tercihini kullanır.
 - **Düğme:** `TemaDugmesi` header'ın üst satırında, sayı bilgisinin yanında durur.
@@ -55,22 +55,23 @@ Gündüzde zemin ve yazı yer değiştirir. Gecede krem olan "ters bantlar" (pop
 
 - **Header** (üç satır):
   1. `Logo` ve sağda "48 ORİJİNAL · 134 MUADİL · 50 ML" ile `TemaDugmesi`.
-  2. Üstte ve altta çizgi olan menü: ANA SAYFA, PARFÜMLER, MARKALAR, NOTALAR, BLOG, GİRİŞ. Öğeler satıra yayılır, bulunulan sayfa dolu hap olur. Telefonda yalnızca aktif sayfa ve GİRİŞ görünür, ileride hamburger eklenebilir. Giriş yapılmışsa GİRİŞ yerine kullanıcı adı ve ÇIKIŞ gelir; admin ise YÖNETİM de eklenir.
+  2. Üstte ve altta çizgi olan menü: ANA SAYFA, PARFÜMLER, NOTALAR, BLOG, GİRİŞ. Öğeler satıra yayılır, bulunulan sayfa dolu hap olur. PARFÜMLER ve NOTALAR açık (`/parfumler`, `/notalar`); BLOG henüz pasif. Telefonda ANA SAYFA, PARFÜMLER ve GİRİŞ görünür (pasif öğeler gizli), ileride hamburger eklenebilir. Giriş yapılmışsa GİRİŞ yerine kullanıcı adı ve ÇIKIŞ gelir; admin ise YÖNETİM de eklenir.
   3. **Uzun arama çubuğu, her sayfada en üstte.** 58px yüksek çizgili hap; solda büyüteç, placeholder "PARFÜM, MARKA YA DA KOD". Yanında dolu "ARA" düğmesi. Mevcut `?ara=` davranışına bağlanır: 300 ms bekler, tek harfte aramaz. Başka sayfadayken arama ana sayfaya `?ara=` ile gider.
 - **KayanSerit:** iki çizgi arasında "kodunu bul ✦ bargello ✦ mad ✦ muscent ✦ aynı koku, uygun fiyat".
 - **Footer:** üst çizgi; solda gün adı ve tarih (bugün), ortada yasal not ("kodlar markaların resmi açıklaması değildir · puanlar editör değerlendirmesidir"), sağda "yapan muadil.".
 
 ## 5. Ana sayfa (`/`)
 
-Sıra: header (arama dahil), blogda öne çıkan, kayan şerit, **bu hafta en popüler**, blog bandı, "sevdiğin koku uygun fiyata" bölümü, footer.
+Sıra: header (arama dahil), blogda öne çıkan, kayan şerit, **bu hafta en popüler**, "sevdiğin koku uygun fiyata" bölümü, footer. ("Blogdan son yazılar" bandı kaldırıldı.)
 
 - **Arama doluyken:** "Blogda öne çıkan" ile popüler bölümünün yerine sonuç listesi gelir. Her sonuç, popüler panelindeki satırın sade hali olur: çerçeve küçük, ad, kodlar, "detaya git".
-- **Blogda öne çıkan:** solda büyük çerçeve (4:5), sağda "01", B/M/M yuvarlakları, başlık ("EN İYİ **10** / ZARA PARFÜMÜ / HANGİSİ?" ve ok dairesi), iki yana yaslı özet, vurgu renginde kategori satırı. Şimdilik statik; örnek veri `src/tasarim/blogOrnek.ts` içinde.
+- **Blogda öne çıkan:** tam genişlikte beyaz sahne (`BlogKapak`): çerçevesiz, 5 Zara şişesi yan yana; ortadaki en önde, üstüne gelen/dokunulan şişe ortaya gelir. Sahnenin içinde, en üstte başlık ("**ZARA** VANİLYA SERİSİ" ve ok dairesi; sahne beyaz olduğu için yazı siyah, vurgu `#7a6548` sabit); başlık okuma sayfasına (`/blog/zara-vanilya-serisi`, `BlogYazisi`) gider; orada aynı şişe sahnesi durur, üstüne gelinen şişe ortaya gelir ve sahnenin altındaki panelde adı, koku ailesi, açıklaması ve yanında şişe ikonlu nota bölümü (`NotaSprey` `panel` + `duz` modu, nota ikonları veritabanındaki notalarla adla eşleşir) yazar (veri `ZARA_SISELER`, açıklamalar Zara'nın ürün sayfalarından özetlendi). Sahne temadan bağımsız beyazdır; şişe fotoğrafları şeffaf zeminli WebP (`src/assets/blog/zara/`). Şimdilik statik; veri `src/tasarim/blogOrnek.ts` içinde. Mockup'taki eski düzen (4:5 çerçeve, özet, kategori satırı) kalktı.
 - **Bu hafta en popüler:**
-  - Başlık "BU HAFTA" vurgu renginde, "**EN** POPÜLER". Sağda dönen rozet.
+  - Başlık ve dönen rozet kaldırıldı; yalnızca sağa yaslı küçük ipucu ("6 parfüm · sekmeye dokun", telefonda gizli) var. Bölüm boşlukları sıkı tutulur (ilk ekranda sekmeler görünsün).
   - Altında `PopulerSekmeler` (hazır). Sıralama şimdilik muadil sayısına göre, ilk 6.
   - Altta "TÜM PARFÜMLER (48)" çizgili hap.
-- **Blog bandı:** ters renkte (gecede krem zemin). "BLOGDAN / **SON** YAZILAR" başlığı, "TÜMÜ" hapı ve 3 kart. Her kart çerçeveli görsel, kategori ve süre, başlık ve "OKU" satırından oluşur. Çerçeve bu bantta ters renktedir (`Cerceve ters`).
+- **Notalar sayfası (`/notalar`, menüde NOTALAR):** tüm notalar alfabetik, 1/2/3/4 sütunlu ince çizgili ızgara (`NotalarSayfasi`). Her kartta küçük numara, ikon (96px, `nota-ikon`), ad (`genis`) ve kısa koku açıklaması. Üstte çizgili hap arama kutusu; ad ve açıklamada arar (Türkçe karakter ve büyük-küçük harf farkı yok sayılır), numaralar alfabetik sıradaki yeri korur. Veri `GET /api/notalar` (`Nota.Aciklama`, `Nota.GorselUrl`); açıklamaları yönetim → Notalar sekmesinden düzenlenir, ilk metinler `NotaAciklamalari.cs` içindedir ve geliştirme ortamında yalnızca boş olanlara yazılır.
+- **Parfümler sayfası (`/parfumler`, menüde PARFÜMLER; "tüm parfümler" hapları da buraya gider):** tüm orijinal parfümler marka ve ada göre sıralı. Her satırda küçük görsel, marka, ad, muadil sayısı ve en uygun fiyat, muadil hapları (marka, kod, fiyat) ve "detaya git"; satırın tamamı `/parfum/:id` detay sayfasına gider.
 - **Sevdiğin koku, uygun fiyata:** büyük başlık, geniş çerçeve, sağda ok dairesi ile "KODUNU BUL" ve kısa açıklama. Sağ üstte yıldız patlaması. Üstte arama olduğu için buradaki arama kutusu kaldırılabilir; yerine "tüm parfümler" hapı konur.
 
 ## 6. Parfüm detay (`/parfum/:id`)
@@ -93,7 +94,7 @@ Sıra: header (arama dahil), hero, kayan şerit, muadiller, koku piramidi, foote
   - Sağda dikey yazı: "3 KOD," vurgu renginde, "**MUADİL**LER". Telefonda gizli.
   - Sıralama: mevcut ölçütler (en benzer, en ucuz, en kalıcı) muadiller başlığının yanında küçük çizgili bir `select` olur.
   - Admin muadil ekleme ve görsel yükleme formları bu sayfada kalır. Görünümleri yeni stile uyar, işlevleri aynı kalır.
-- **Koku piramidi:** `NotaSprey` (hazır). Başlık "KOKU **PİRAMİDİ**"; şişe tema yazı renginde. Bölüm ekrana girince bir kez kendiliğinden sıkılır, şişeye basınca tekrar sıkılır.
+- **Koku piramidi:** `NotaSprey` (hazır). Başlık "KOKU **PİRAMİDİ**"; şişe tema yazı renginde. Bölüm ekrana girince bir kez kendiliğinden sıkılır, şişeye basınca tekrar sıkılır. Her nota 88px'lik bir sütun: üstte ikon, altında küçük büyük harf ad (`nota-ad`); ikon da harfler gibi sağdan uçarak yerine oturur. Ikonlar `Nota.GorselUrl` ile gelir (admin → Notalar → "Toplu görsel yükle", dosya adı nota adı). Çizim dili: tek renk, ince çizgi, botanik/baskı resmi gibi, şeffaf PNG; koyu mürekkeple çizilir, `nota-ikon` filtresiyle temaya göre boyanır (gecede krem, gündüzde koyu; ters renkli kutuda `nota-ikon-ters`). Görseli olmayan nota marka yıldızıyla gösterilir. Hazır set `docs/nota-gorselleri/` (PNG + `kaynak/*.svg`).
 
 ## 7. Boyutlar
 
