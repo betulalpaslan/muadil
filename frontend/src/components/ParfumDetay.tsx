@@ -7,6 +7,9 @@ import { gorselAdresi } from "../gorsel";
 import { tl } from "../para";
 import { gercekRenk, pastel } from "../tasarim/renk";
 import type { Cinsiyet, Marka, Muadil, ParfumDetayVeri } from "../types";
+import { ortalamaYaz } from "../puan";
+import DegerlendirmeBolumu, { Yildiz } from "./DegerlendirmeBolumu";
+import FavoriDugmesi from "./FavoriDugmesi";
 import { Footer } from "./OrtakYerlesim";
 import Asterisk from "./tasarim/Asterisk";
 import Cerceve from "./tasarim/Cerceve";
@@ -115,6 +118,7 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
   const [hata, setHata] = useState("");
   const [muadilMarkalar, setMuadilMarkalar] = useState<Marka[]>([]);
   const [form, setForm] = useState(BOS_FORM);
+  const [seciliMuadilId, setSeciliMuadilId] = useState<number | null>(null);
 
   async function yukle() {
     setParfum(await apiIstek<ParfumDetayVeri>(`/api/parfumler/${id}`));
@@ -170,6 +174,13 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
     }
   }
 
+  // Karttaki "değerlendir" bağlantısı: aşağıdaki bölümde o muadili seçip oraya kaydırır.
+  function degerlendirmeyeGit(muadilId: number) {
+    setSeciliMuadilId(muadilId);
+    const azHareket = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("degerlendirmeler")?.scrollIntoView({ behavior: azHareket ? "auto" : "smooth", block: "start" });
+  }
+
   async function gorselYukle(e: ChangeEvent<HTMLInputElement>) {
     const dosya = e.target.files?.[0];
     if (!dosya) return;
@@ -199,7 +210,7 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
 
   return (
     <article>
-      <section className="flex flex-col items-center gap-5 px-[clamp(16px,5vw,70px)] pt-10 pb-4 text-center">
+      <section className="flex flex-col items-center gap-5 px-(--kenar) pt-10 pb-4 text-center">
         <div className="flex w-full items-center justify-between">
           <Link to="/" className="kucuk inline-flex min-h-11 items-center text-yazi no-underline">
             ← tüm parfümler
@@ -242,12 +253,14 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
               </span>
             </div>
 
+            <FavoriDugmesi parfumId={parfum.id} />
+
             <NotaSprey notalar={parfum.notalar} />
           </div>
         </div>
       </section>
 
-      <section id="muadiller" className="relative border-t-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] pt-14 pb-16">
+      <section id="muadiller" className="relative border-t-[1.5px] border-yazi px-(--kenar) pt-14 pb-16">
         {parfum.muadiller.length === 0 ? (
           <p className="text-sm">Bu parfüm için henüz muadil eklenmedi.</p>
         ) : (
@@ -316,6 +329,18 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
                       </button>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => degerlendirmeyeGit(m.id)}
+                    className="kucuk inline-flex min-h-11 cursor-pointer items-center gap-2 self-start border-0 bg-transparent p-0 text-yazi underline"
+                  >
+                    <span className="inline-flex text-vurgu">
+                      <Yildiz dolu={m.degerlendirmeSayisi > 0} boyut={16} />
+                    </span>
+                    {m.degerlendirmeOrtalamasi !== null && m.degerlendirmeSayisi > 0
+                      ? `${ortalamaYaz(m.degerlendirmeOrtalamasi)} · ${m.degerlendirmeSayisi} değerlendirme`
+                      : "ilk değerlendiren sen ol"}
+                  </button>
                 </div>
               ))}
             </div>
@@ -323,8 +348,18 @@ export default function ParfumDetay({ adminMi }: { adminMi: boolean }) {
         )}
       </section>
 
+      {siraliMuadiller.length > 0 && (
+        <DegerlendirmeBolumu
+          muadiller={siraliMuadiller}
+          seciliId={seciliMuadilId ?? siraliMuadiller[0].id}
+          onSec={setSeciliMuadilId}
+          onDegisti={() => yukle().catch((e) => setHata(e.message))}
+          adminMi={adminMi}
+        />
+      )}
+
       {adminMi && (
-        <section className="space-y-6 border-t-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] py-10">
+        <section className="space-y-6 border-t-[1.5px] border-yazi px-(--kenar) py-10">
           <h2 className="genis text-xl">Yönetim</h2>
 
           <label className="kucuk block text-soluk">

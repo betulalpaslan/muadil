@@ -60,7 +60,7 @@ export default function BlogYazisi() {
 
   return (
     <>
-      <article className="flex flex-col gap-8 px-[clamp(16px,5vw,70px)] pt-10 pb-20">
+      <article className="flex flex-col gap-8 px-(--kenar) pt-10 pb-20">
         <Link to="/" className="kucuk inline-flex min-h-11 items-center self-start text-yazi no-underline">
           ← ana sayfa
         </Link>

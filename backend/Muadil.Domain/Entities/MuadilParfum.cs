@@ -16,4 +16,6 @@ public class MuadilParfum
 
     public int MarkaId { get; set; }
     public Marka Marka { get; set; } = null!;
+
+    public List<Degerlendirme> Degerlendirmeler { get; set; } = new();
 }

@@ -15,10 +15,10 @@ Bu klasördekiler:
 
 | Konu | Kural |
 |---|---|
-| Yazı tipi | Syne, tek aile (400–800), `@fontsource/syne`. Google Fonts kullanılmaz. Değiştirmek gerekirse yalnızca `--font-govde` değişir; Poppins ve Jost denendi. |
+| Yazı tipi | Tüm sistem tek aile: Outfit (200–800, `@fontsource/outfit`); başka font kullanılmaz. Kapak başlığındaki fark ("ZARA" 400, alt başlık 200) yalnızca ağırlıktan gelir. Google Fonts kullanılmaz. Değiştirmek gerekirse yalnızca `--font-govde` değişir; Syne (çok geniş durduğu için), Poppins, Jost, Bodoni Moda ve Cormorant Garamond denendi. |
 | ₺ işareti | "Lira Isareti" yüzü yalnızca U+20BA için Inter kullanır. `tl()` biçimi aynen kalır. |
-| Başlık | `genis` sınıfı: büyük harf, `letter-spacing: .14em`, 500 ağırlık. Vurgulu kelime 800 ağırlık ya da `text-vurgu` renginde. Satır yüksekliği 1.3–1.45, kelime aralığı .2–.35em. |
-| Etiket | `kucuk` sınıfı: 10px, 600, `letter-spacing: .22em`, büyük harf. |
+| Başlık | `genis` sınıfı: büyük harf, `letter-spacing: .08em`, 500 ağırlık. Vurgulu kelime 800 ağırlık ya da `text-vurgu` renginde. Satır yüksekliği 1.3–1.45, kelime aralığı .2–.35em. |
+| Etiket | `kucuk` sınıfı: 11px, 500, `letter-spacing: .16em`, büyük harf. |
 | Çizgi | 1.5px `yazi` renginde. Bölümler arası tam genişlik yatay çizgi. |
 | Düğme | Hap (`rounded-full`) ya da daire. Çizgili olanlar `cizgili` ile hover'da dolar; ana düğme dolu. |
 | Görsel | `Cerceve`: düz, eğik değil, tırtık yok. Kenarlarda 14px pay, altta etiket satırı ("SAUVAGE ... NO. 02"). |
@@ -34,7 +34,7 @@ Renkler CSS değişkeni; `<html data-tema="gunduz">` gündüzü açar. Tailwind 
 |---|---|---|---|---|
 | `zemin` | `--si` | #0B0B0B | #F4F0E9 | sayfa zemini |
 | `yazi` | `--be` | #F2EEE8 | #141212 | yazı, çizgi, çerçeve, ters bantların zemini |
-| `vurgu` | `--ta` | #C8B497 | #7A6548 | vurgu kelimeleri, etiketler |
+| `vurgu` | `--ta` | #D6BB8D | #7A6548 | vurgu kelimeleri, etiketler |
 | `vurgu-ters` | `--ta2` | #7A6548 | #C8B497 | ters bantlardaki vurgu |
 | `yuzey` | `--gr` | #1A1A1A | #E3DDD3 | görsel yer tutucu, sekme hover |
 | `soluk` | `--gr2` | #8A8580 | #6F6A64 | ikincil yazı |
@@ -55,7 +55,7 @@ Gündüzde zemin ve yazı yer değiştirir. Gecede krem olan "ters bantlar" (pop
 
 - **Header** (üç satır):
   1. `Logo` ve sağda "48 ORİJİNAL · 134 MUADİL · 50 ML" ile `TemaDugmesi`.
-  2. Üstte ve altta çizgi olan menü: ANA SAYFA, PARFÜMLER, NOTALAR, BLOG, GİRİŞ. Öğeler satıra yayılır, bulunulan sayfa dolu hap olur. PARFÜMLER ve NOTALAR açık (`/parfumler`, `/notalar`); BLOG henüz pasif. Telefonda ANA SAYFA, PARFÜMLER ve GİRİŞ görünür (pasif öğeler gizli), ileride hamburger eklenebilir. Giriş yapılmışsa GİRİŞ yerine kullanıcı adı ve ÇIKIŞ gelir; admin ise YÖNETİM de eklenir.
+  2. Üstte ve altta çizgi olan menü: ANA SAYFA, PARFÜMLER, NOTALAR, BLOG, GİRİŞ. Öğeler satıra yayılır, bulunulan sayfa dolu hap olur. PARFÜMLER ve NOTALAR açık (`/parfumler`, `/notalar`); BLOG henüz pasif. Telefonda ANA SAYFA, PARFÜMLER ve GİRİŞ görünür (pasif öğeler gizli), ileride hamburger eklenebilir. Giriş yapılmışsa GİRİŞ yerine kullanıcı adı ve ÇIKIŞ gelir, menüye FAVORİLERİM (`/favorilerim`) eklenir; admin ise YÖNETİM de eklenir. Menü dar ekranda sığmazsa alt satıra sarar (yatay kaydırma yok).
   3. **Uzun arama çubuğu, her sayfada en üstte.** 58px yüksek çizgili hap; solda büyüteç, placeholder "PARFÜM, MARKA YA DA KOD". Yanında dolu "ARA" düğmesi. Mevcut `?ara=` davranışına bağlanır: 300 ms bekler, tek harfte aramaz. Başka sayfadayken arama ana sayfaya `?ara=` ile gider.
 - **KayanSerit:** iki çizgi arasında "kodunu bul ✦ bargello ✦ mad ✦ muscent ✦ aynı koku, uygun fiyat".
 - **Footer:** üst çizgi; solda gün adı ve tarih (bugün), ortada yasal not ("kodlar markaların resmi açıklaması değildir · puanlar editör değerlendirmesidir"), sağda "yapan muadil.".
@@ -65,7 +65,7 @@ Gündüzde zemin ve yazı yer değiştirir. Gecede krem olan "ters bantlar" (pop
 Sıra: header (arama dahil), blogda öne çıkan, kayan şerit, **bu hafta en popüler**, "sevdiğin koku uygun fiyata" bölümü, footer. ("Blogdan son yazılar" bandı kaldırıldı.)
 
 - **Arama doluyken:** "Blogda öne çıkan" ile popüler bölümünün yerine sonuç listesi gelir. Her sonuç, popüler panelindeki satırın sade hali olur: çerçeve küçük, ad, kodlar, "detaya git".
-- **Blogda öne çıkan:** tam genişlikte beyaz sahne (`BlogKapak`): çerçevesiz, 5 Zara şişesi yan yana; ortadaki en önde, üstüne gelen/dokunulan şişe ortaya gelir. Sahnenin içinde, en üstte başlık ("**ZARA** VANİLYA SERİSİ" ve ok dairesi; sahne beyaz olduğu için yazı siyah, vurgu `#7a6548` sabit); başlık okuma sayfasına (`/blog/zara-vanilya-serisi`, `BlogYazisi`) gider; orada aynı şişe sahnesi durur, üstüne gelinen şişe ortaya gelir ve sahnenin altındaki panelde adı, koku ailesi, açıklaması ve yanında şişe ikonlu nota bölümü (`NotaSprey` `panel` + `duz` modu, nota ikonları veritabanındaki notalarla adla eşleşir) yazar (veri `ZARA_SISELER`, açıklamalar Zara'nın ürün sayfalarından özetlendi). Sahne temadan bağımsız beyazdır; şişe fotoğrafları şeffaf zeminli WebP (`src/assets/blog/zara/`). Şimdilik statik; veri `src/tasarim/blogOrnek.ts` içinde. Mockup'taki eski düzen (4:5 çerçeve, özet, kategori satırı) kalktı.
+- **Blogda öne çıkan:** tam genişlikte sahne (`BlogKapak`; gece koyu, gündüz beyaz): çerçevesiz, 5 Zara şişesi yan yana; ortadaki en önde, üstüne gelen/dokunulan şişe ortaya gelir. Sahnenin içinde, en üstte başlık (büyük Didone "ZARA", altında ince "VANİLYA SERİSİ", yanında ok dairesi; renkler sahnenin `--ks-*` değişkenlerinden gelir: gecede krem yazı ve altın degradeli marka kelimesi, gündüzde siyah yazı ve koyu bronz); başlık okuma sayfasına (`/blog/zara-vanilya-serisi`, `BlogYazisi`) gider; orada aynı şişe sahnesi durur, üstüne gelinen şişe ortaya gelir ve sahnenin altındaki panelde adı, koku ailesi, açıklaması ve yanında şişe ikonlu nota bölümü (`NotaSprey` `panel` + `duz` modu, nota ikonları veritabanındaki notalarla adla eşleşir) yazar (veri `ZARA_SISELER`, açıklamalar Zara'nın ürün sayfalarından özetlendi). Sahne temaya göre değişir: gecede `#0B0B0B` zemin ve şişelerin arkasında şampanya/bronz ışık (`kapak-isik`, nefes alır, imleçle kayar, öne gelen şişe değişince bir kez çakar; zemin gölgesi bronz yansıma olur), gündüzde beyaz zemin ve çok hafif sıcak hale. Açılış sekansı: ışık yanar, şişeler ortadan kenara yükselir, başlık soldan açılır ve marka kelimesinden arada altın parlama geçer, ok dairesi dönerek belirir; şişe omuzlarında ✦ ışıltıları yanıp söner (telefonda gizli). Ok dairesine gelince ok çapraz çıkıp karşıdan girer. Hepsi `prefers-reduced-motion` ile kapanır (tasarim.css). Şişe fotoğrafları şeffaf zeminli WebP (`src/assets/blog/zara/`). Şimdilik statik; veri `src/tasarim/blogOrnek.ts` içinde. Mockup'taki eski düzen (4:5 çerçeve, özet, kategori satırı) kalktı.
 - **Bu hafta en popüler:**
   - Başlık ve dönen rozet kaldırıldı; yalnızca sağa yaslı küçük ipucu ("6 parfüm · sekmeye dokun", telefonda gizli) var. Bölüm boşlukları sıkı tutulur (ilk ekranda sekmeler görünsün).
   - Altında `PopulerSekmeler` (hazır). Sıralama şimdilik muadil sayısına göre, ilk 6.
@@ -76,7 +76,10 @@ Sıra: header (arama dahil), blogda öne çıkan, kayan şerit, **bu hafta en po
 
 ## 6. Parfüm detay (`/parfum/:id`)
 
-Sıra: header (arama dahil), hero, kayan şerit, muadiller, koku piramidi, footer.
+Sıra: header (arama dahil), hero, kayan şerit, muadiller, kullanıcı değerlendirmeleri, koku piramidi, footer.
+
+- **Favori:** Hero'da "FAVORİLERE EKLE" hapı (`FavoriDugmesi`); favorideyse dolu hap ve "FAVORİLERİNDE". Giriş yoksa tıklayınca girişe gider, sonra aynı sayfaya döner. Liste `/favorilerim` sayfasında (`FavorilerSayfasi`), `GET/PUT/DELETE /api/favoriler`.
+- **Kullanıcı değerlendirmeleri** (`DegerlendirmeBolumu`, `#degerlendirmeler`): kullanıcılar orijinal parfümü değil, onun **muadillerini** değerlendirir. Bölümün üstünde muadil seçici (hap düğmeler); muadil kartındaki "ortalama · N değerlendirme" bağlantısı ilgili muadili seçip bölüme kaydırır. Bir değerlendirme: zorunlu **genel** 1-5 yıldız, isteğe bağlı **benzerlik** ve **kalıcılık** 1-5 yıldız ("temizle" ile geri alınır) ve isteğe bağlı yorum (en çok 1000 karakter). Kullanıcı başına muadil başına tek kayıt, güncellenebilir ve silinebilir. Seçili muadilin başlığında genel ortalama, sayı ve (varsa) benzerlik/kalıcılık ortalamaları; ortalamalar yalnız o puanı verenler üzerinden alınır. Okumak herkese açık, yazmak giriş ister. Admin her yorumu silebilir. API: `GET /api/muadiller/{id}/degerlendirmeler`, `PUT/DELETE /api/muadiller/{id}/degerlendirme`. Bu 1-5 kullanıcı puanları, editörün 1-10 muadil puanlarından (benzerlik, kalıcılık) ayrıdır.
 
 - **Hero:** Solda çerçeve. Çerçevenin içi parfümün pasteli; `gorselUrl` varsa `object-contain` görsel gösterilir. Etiket "MARKA · AD ... NO. 01", köşede asterisk.
   Sağda sırasıyla:

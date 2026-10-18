@@ -32,14 +32,7 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
 
         return await sorgu
             .OrderBy(p => p.Ad)
-            .Select(p => new ParfumListeDto(
-                p.Id, p.Ad, p.Marka.Ad, p.GorselUrl, p.Renk,
-                p.Muadiller.Count(),
-                p.Muadiller.Min(m => (decimal?)m.Fiyat),
-                p.Muadiller
-                    .OrderBy(m => m.Fiyat)
-                    .Select(m => new MuadilOzetDto(m.Marka.Ad, m.Kod, m.Fiyat))
-                    .ToList()))
+            .Select(ParfumProjeksiyonlari.Liste)
             .ToListAsync();
     }
 
@@ -52,12 +45,13 @@ public class ParfumlerController(MuadilDbContext db, IGorselDeposu gorselDeposu)
                 p.Id, p.Ad, p.Cinsiyet, p.MarkaId, p.Marka.Ad, p.GorselUrl, p.Renk,
                 p.Notalar
                     .OrderBy(pn => pn.Katman).ThenBy(pn => pn.Nota.Ad)
-                    .Select(pn => new ParfumNotaDto(pn.NotaId, pn.Nota.Ad, pn.Katman, pn.Nota.GorselUrl))
+                    .Select(pn => new ParfumNotaDto(pn.NotaId, pn.Nota.Ad, pn.Katman, pn.Nota.GorselUrl, pn.Nota.Aciklama))
                     .ToList(),
                 p.Muadiller
                     .OrderByDescending(m => m.BenzerlikPuani).ThenBy(m => m.Fiyat)
                     .Select(m => new MuadilDto(m.Id, m.Marka.Ad, m.Marka.GorselUrl, m.Kod, m.Cinsiyet, m.Fiyat,
-                        m.KalicilikPuani, m.BenzerlikPuani, m.UrunLinki))
+                        m.KalicilikPuani, m.BenzerlikPuani, m.UrunLinki,
+                        m.Degerlendirmeler.Average(d => (double?)d.Puan), m.Degerlendirmeler.Count()))
                     .ToList()))
             .FirstOrDefaultAsync();
 

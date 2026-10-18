@@ -4,9 +4,11 @@ import AdminSayfasi from "./components/admin/AdminSayfasi";
 import { Header } from "./components/OrtakYerlesim";
 import AnaSayfa from "./components/AnaSayfa";
 import BlogYazisi from "./components/BlogYazisi";
+import FavorilerSayfasi from "./components/FavorilerSayfasi";
 import NotalarSayfasi from "./components/NotalarSayfasi";
 import ParfumDetay from "./components/ParfumDetay";
 import ParfumlerSayfasi from "./components/ParfumlerSayfasi";
+import RenkAyari from "./components/tasarim/RenkAyari";
 import { ONE_CIKAN_BLOG } from "./tasarim/blogOrnek";
 
 function tokenIcerigi(token: string) {
@@ -33,6 +35,7 @@ export default function App() {
         <Route path="/" element={<AnaSayfa />} />
         <Route path="/parfumler" element={<ParfumlerSayfasi />} />
         <Route path="/notalar" element={<NotalarSayfasi />} />
+        <Route path="/favorilerim" element={<FavorilerSayfasi />} />
         <Route path="/parfum/:id" element={<ParfumDetay adminMi={adminMi} />} />
         <Route path={ONE_CIKAN_BLOG.yol} element={<BlogYazisi />} />
         <Route
@@ -46,6 +49,7 @@ export default function App() {
           }
         />
       </Routes>
+      <RenkAyari />
     </div>
   );
 }

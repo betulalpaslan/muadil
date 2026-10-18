@@ -22,6 +22,86 @@ namespace Muadil.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Muadil.Domain.Entities.Degerlendirme", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BenzerlikPuani")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("GuncellemeTarihi")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("KalicilikPuani")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("KullaniciAdi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("KullaniciId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("MuadilParfumId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("OlusturmaTarihi")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Puan")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Yorum")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MuadilParfumId");
+
+                    b.HasIndex("KullaniciId", "MuadilParfumId")
+                        .IsUnique()
+                        .HasFilter("\"SilinmeTarihi\" IS NULL");
+
+                    b.ToTable("Degerlendirmeler", t =>
+                        {
+                            t.HasCheckConstraint("CK_Degerlendirme_Benzerlik", "\"BenzerlikPuani\" IS NULL OR \"BenzerlikPuani\" BETWEEN 1 AND 5");
+
+                            t.HasCheckConstraint("CK_Degerlendirme_Kalicilik", "\"KalicilikPuani\" IS NULL OR \"KalicilikPuani\" BETWEEN 1 AND 5");
+
+                            t.HasCheckConstraint("CK_Degerlendirme_Puan", "\"Puan\" BETWEEN 1 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("Muadil.Domain.Entities.Favori", b =>
+                {
+                    b.Property<string>("KullaniciId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("ParfumId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("KullaniciId", "ParfumId");
+
+                    b.HasIndex("ParfumId");
+
+                    b.ToTable("Favoriler");
+                });
+
             modelBuilder.Entity("Muadil.Domain.Entities.Marka", b =>
                 {
                     b.Property<int>("Id")
@@ -194,6 +274,28 @@ namespace Muadil.Infrastructure.Migrations
                     b.ToTable("ParfumNotalar");
                 });
 
+            modelBuilder.Entity("Muadil.Domain.Entities.Degerlendirme", b =>
+                {
+                    b.HasOne("Muadil.Domain.Entities.MuadilParfum", "MuadilParfum")
+                        .WithMany("Degerlendirmeler")
+                        .HasForeignKey("MuadilParfumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MuadilParfum");
+                });
+
+            modelBuilder.Entity("Muadil.Domain.Entities.Favori", b =>
+                {
+                    b.HasOne("Muadil.Domain.Entities.Parfum", "Parfum")
+                        .WithMany()
+                        .HasForeignKey("ParfumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parfum");
+                });
+
             modelBuilder.Entity("Muadil.Domain.Entities.MuadilParfum", b =>
                 {
                     b.HasOne("Muadil.Domain.Entities.Marka", "Marka")
@@ -241,6 +343,11 @@ namespace Muadil.Infrastructure.Migrations
                     b.Navigation("Nota");
 
                     b.Navigation("Parfum");
+                });
+
+            modelBuilder.Entity("Muadil.Domain.Entities.MuadilParfum", b =>
+                {
+                    b.Navigation("Degerlendirmeler");
                 });
 
             modelBuilder.Entity("Muadil.Domain.Entities.Parfum", b =>

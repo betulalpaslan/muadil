@@ -1,9 +1,12 @@
 /* Muadil tasarım sistemi (K · Siyah dergi). index.css içinde @import "tailwindcss"; satırından SONRA import edilir. */
-@import "@fontsource/syne/400.css";
-@import "@fontsource/syne/500.css";
-@import "@fontsource/syne/600.css";
-@import "@fontsource/syne/700.css";
-@import "@fontsource/syne/800.css";
+/* Tüm sistem tek aile: Outfit (geometrik sans). Kapak başlığındaki ince/kalın fark yalnızca ağırlıktan gelir. */
+@import "@fontsource/outfit/200.css";
+@import "@fontsource/outfit/300.css";
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/700.css";
+@import "@fontsource/outfit/800.css";
 
 /* ₺ işareti her yazı tipinde doğru çizilmiyor; yalnızca U+20BA Inter'den gelir. */
 @font-face {
@@ -19,7 +22,7 @@
 :root {
   --si: #0b0b0b; /* zemin */
   --be: #f2eee8; /* yazı, çizgi, çerçeve */
-  --ta: #c8b497; /* vurgu (taupe) */
+  --ta: #d6bb8d; /* vurgu (şampanya) */
   --ta2: #7a6548; /* ters bantlarda vurgu */
   --gr: #1a1a1a; /* yüzey: görsel yeri, sekme hover */
   --gr2: #8a8580; /* soluk yazı */
@@ -29,6 +32,19 @@
   --ikon-ters-f: none; /* ters renkli kutuda (bg-yazi) ikonlar koyu kalır */
   --p1t: #8f959d; /* ters renkli kutuda (bg-yazi) parıltı açık */
   --p2t: #6b7178; /* ters renkli kutuda parıltı koyu */
+  /* Yan boşluk: dar ekranda %5, geniş ekranda içerik 1280px'te kalır. Bölüm çizgileri tam genişlikte, içerik ortada. */
+  --kenar: max(clamp(16px, 5vw, 70px), calc((100% - 1280px) / 2));
+  /* Üst bölge (header, arama, şerit): gecede ince soluk çizgi, şampanya düğme; gündüzde eski koyu çizgi ve dolu düğme. */
+  --cz: rgb(242 238 232 / 0.16); /* ince çizgi */
+  --cz-arama: rgb(242 238 232 / 0.26); /* arama kutusu çerçevesi */
+  --hap-bg: transparent; /* etkin menü hapı */
+  --hap-fg: var(--ta);
+  --hap-bd: var(--ta);
+  --btn-bg: linear-gradient(135deg, #f1dfbd, #cfa970); /* ARA düğmesi */
+  --btn-fg: #1a1208;
+  --serit-bg: linear-gradient(90deg, #17110a, #3a2a14 50%, #17110a); /* kayan şerit */
+  --serit-fg: #e8d2a8;
+  --serit-bd: #a87c43;
   color-scheme: dark;
 }
 :root[data-tema="gunduz"] {
@@ -44,11 +60,55 @@
   --ikon-ters-f: brightness(0) invert(0.93) sepia(0.08);
   --p1t: #d9dde2;
   --p2t: #a9aeb5;
+  --cz: #141212;
+  --cz-arama: #141212;
+  --hap-bg: #141212;
+  --hap-fg: #f4f0e9;
+  --hap-bd: #141212;
+  --btn-bg: #141212;
+  --btn-fg: #f4f0e9;
+  --serit-bg: transparent;
+  --serit-fg: #141212;
+  --serit-bd: #141212;
   color-scheme: light;
 }
 
+/* Blog kapağı sahnesi (BlogKapak, AnaSayfa başlığı). Gece: koyu sahne, arkadan şampanya/bronz ışık.
+   Gündüz: beyaz sahne (fotoğraflar beyaz zeminde çekildi), ışık yerine çok hafif sıcak hale. */
+:root {
+  --ks-bg: #0b0b0b;
+  --ks-yazi: #f2eee8;
+  --ks-marka-1: #c9a36a; /* marka kelimesi degradesi: şampanya, parlama, bronz */
+  --ks-marka-2: #fbefd0;
+  --ks-marka-3: #a87c43;
+  --ks-ok-bg: var(--ta);
+  --ks-ok-yazi: #0b0b0b;
+  --ks-ok-bd: var(--ta);
+  --ks-aci: 105deg; /* marka kelimesi degradesinin açısı */
+  --ks-isik-1: rgb(232 188 108 / 0.55); /* arka ışık: çekirdek, kenar */
+  --ks-isik-2: rgb(168 118 58 / 0.24);
+  --ks-vur: rgb(255 244 205 / 0.45); /* şişe değişince çakan parlama */
+  --ks-golge: #a87c43; /* zemin: gölge yerine ışık yansıması */
+  --ks-isilti: #f3e2a9;
+}
+:root[data-tema="gunduz"] {
+  --ks-bg: #fff;
+  --ks-yazi: #000;
+  --ks-marka-1: #5e4a2e;
+  --ks-marka-2: #b8975f;
+  --ks-marka-3: #7a6548;
+  --ks-ok-bg: #7a6548;
+  --ks-ok-yazi: #fff;
+  --ks-ok-bd: #000;
+  --ks-isik-1: rgb(168 124 67 / 0.22);
+  --ks-isik-2: rgb(168 124 67 / 0.08);
+  --ks-vur: rgb(168 124 67 / 0.18);
+  --ks-golge: #000;
+  --ks-isilti: #a87c43;
+}
+
 @theme inline {
-  --font-govde: "Lira Isareti", "Syne", system-ui, sans-serif;
+  --font-govde: "Lira Isareti", "Outfit", system-ui, sans-serif;
   --color-zemin: var(--si);
   --color-yazi: var(--be);
   --color-vurgu: var(--ta);
@@ -77,14 +137,14 @@
 /* Geniş aralıklı büyük harf başlık */
 @utility genis {
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 /* Küçük etiket: menü, kategori, düğme yazısı */
 @utility kucuk {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 /* Nota adı: ikonun altında, dar sütuna sığan küçük büyük harf */
@@ -102,6 +162,23 @@
 }
 @utility nota-ikon-ters {
   filter: var(--ikon-ters-f);
+}
+/* Nota açıklama kartı: notanın üstünde belirir (NotaSprey) */
+@keyframes kart-gir {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@utility kart-gir {
+  animation: kart-gir 0.16s ease-out both;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 /* Çizgili hap/daire: hover'da içi dolar */
 @utility cizgili {
@@ -242,5 +319,190 @@
   mask-repeat: no-repeat;
   @media (prefers-reduced-motion: reduce) {
     display: none;
+  }
+}
+
+/* Kapak arka ışığı: sayfa açılınca yanar, sonra yavaş nefes alır; imleçle çok hafif kayar (--px sahneden gelir).
+   İçindeki kapak-isik-vur, öne gelen şişe değişince (key ile yeniden kurulur) bir kez çakıp söner. */
+@keyframes isik-yan {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes isik-nefes {
+  0%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.72;
+    scale: 0.94;
+  }
+}
+@keyframes isik-vur {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@utility kapak-isik {
+  background: radial-gradient(ellipse 50% 62% at 50% 58%, var(--ks-isik-1), var(--ks-isik-2) 52%, transparent 78%);
+  transform-origin: 50% 60%;
+  translate: calc(var(--px, 0) * 22px) 0;
+  transition: translate 0.4s ease-out;
+  animation:
+    isik-yan 1.2s ease-out both,
+    isik-nefes 6s ease-in-out 1.2s infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+  }
+}
+@utility kapak-isik-vur {
+  background: radial-gradient(ellipse 18% 38% at 50% 58%, var(--ks-vur), transparent 70%);
+  opacity: 0;
+  animation: isik-vur 0.9s ease-out;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Açılış: şişeler ortadan kenara doğru sırayla yükselir (--k ortadan uzaklık sırası). `translate` ayrı özellik
+   olduğu için sise-yer'in transform geçişiyle çakışmaz; backwards ile bitince hiçbir şey tutmaz. */
+@keyframes sise-cik {
+  from {
+    opacity: 0;
+    translate: 0 56px;
+  }
+}
+@utility sise-cik {
+  animation: sise-cik 1s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  animation-delay: calc(0.45s + var(--k, 0) * 0.14s);
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Başlık soldan sağa açılır; marka kelimesinin üstünden arada bir altın parlama geçer. */
+@keyframes baslik-ac {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@utility kapak-baslik {
+  animation: baslik-ac 0.9s cubic-bezier(0.65, 0, 0.25, 1) 0.7s backwards;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@keyframes marka-parilti {
+  0%,
+  70% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+@utility kapak-marka {
+  background: linear-gradient(
+      var(--ks-aci),
+      var(--ks-marka-1) 0%,
+      var(--ks-marka-1) 35%,
+      var(--ks-marka-2) 48%,
+      var(--ks-marka-3) 52%,
+      var(--ks-marka-1) 65%,
+      var(--ks-marka-1) 100%
+    )
+    0 0 / 250% 100% no-repeat;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  animation: marka-parilti 8s ease-in-out 1.8s infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Kapak alt başlığı: ultra-ince, geniş aralıklı büyük harf. Yalnızca büyük boyutta (okunurluk). */
+@utility kapak-alt {
+  font-weight: 200;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ✦ ışıltıları: şişelerin omuzlarında sırayla belirip söner (--gec gecikme). */
+@keyframes parilti-yan {
+  0%,
+  100% {
+    opacity: 0;
+    scale: 0.3;
+    rotate: 0deg;
+  }
+  45%,
+  55% {
+    opacity: 1;
+    scale: 1;
+    rotate: 45deg;
+  }
+}
+@utility isilti {
+  opacity: 0;
+  animation: parilti-yan 3.6s ease-in-out infinite;
+  animation-delay: calc(1.6s + var(--gec, 0s));
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+}
+
+/* Ok dairesi: açılışta dönerek belirir; üstüne gelince ok çapraz çıkıp karşıdan girer (daire overflow-hidden).
+   .group: bağlantının kendisi. */
+@keyframes ok-gir {
+  from {
+    opacity: 0;
+    rotate: -120deg;
+    scale: 0.3;
+  }
+}
+@keyframes ok-git {
+  0% {
+    translate: 0 0;
+  }
+  45% {
+    translate: 130% -130%;
+  }
+  46% {
+    translate: -130% 130%;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+@utility ok-gir {
+  animation: ok-gir 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.3) 1.4s backwards;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .group:hover .ok-ic,
+  .group:focus-visible .ok-ic {
+    animation: ok-git 0.55s ease-in-out;
   }
 }

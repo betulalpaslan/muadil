@@ -10,6 +10,8 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
     public DbSet<MuadilParfum> MuadilParfumler => Set<MuadilParfum>();
     public DbSet<Nota> Notalar => Set<Nota>();
     public DbSet<ParfumNota> ParfumNotalar => Set<ParfumNota>();
+    public DbSet<Favori> Favoriler => Set<Favori>();
+    public DbSet<Degerlendirme> Degerlendirmeler => Set<Degerlendirme>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,6 +72,37 @@ public class MuadilDbContext(DbContextOptions<MuadilDbContext> options) : DbCont
                 .HasForeignKey(x => x.NotaId)
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasQueryFilter(x => x.Parfum.SilinmeTarihi == null);
+        });
+
+        modelBuilder.Entity<Favori>(e =>
+        {
+            e.HasKey(x => new { x.KullaniciId, x.ParfumId });
+            e.Property(x => x.KullaniciId).HasMaxLength(64);
+            e.HasOne(x => x.Parfum).WithMany()
+                .HasForeignKey(x => x.ParfumId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasQueryFilter(x => x.Parfum.SilinmeTarihi == null);
+        });
+
+        modelBuilder.Entity<Degerlendirme>(e =>
+        {
+            e.Property(x => x.KullaniciId).HasMaxLength(64).IsRequired();
+            e.Property(x => x.KullaniciAdi).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Yorum).HasMaxLength(1000);
+            e.HasOne(x => x.MuadilParfum).WithMany(m => m.Degerlendirmeler)
+                .HasForeignKey(x => x.MuadilParfumId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // Bir kullanıcı bir muadili bir kez değerlendirir; silinen kayıt yeniden değerlendirmeyi engellemez
+            e.HasIndex(x => new { x.KullaniciId, x.MuadilParfumId }).IsUnique()
+                .HasFilter("\"SilinmeTarihi\" IS NULL");
+            e.HasIndex(x => x.MuadilParfumId);
+            e.HasQueryFilter(x => x.SilinmeTarihi == null && x.MuadilParfum.SilinmeTarihi == null && x.MuadilParfum.Parfum.SilinmeTarihi == null);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_Degerlendirme_Puan", "\"Puan\" BETWEEN 1 AND 5");
+                t.HasCheckConstraint("CK_Degerlendirme_Benzerlik", "\"BenzerlikPuani\" IS NULL OR \"BenzerlikPuani\" BETWEEN 1 AND 5");
+                t.HasCheckConstraint("CK_Degerlendirme_Kalicilik", "\"KalicilikPuani\" IS NULL OR \"KalicilikPuani\" BETWEEN 1 AND 5");
+            });
         });
     }
 }

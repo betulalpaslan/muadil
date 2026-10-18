@@ -27,35 +27,41 @@ function Ok({ boyut = 12 }: { boyut?: number }) {
   );
 }
 
-// beyazZemin: sabit beyaz sahnenin (BlogKapak) üstünde tema renkleri kaybolur; renkler sabit verilir.
-function OkDairesi({ boyut = 44, beyazZemin = false }: { boyut?: number; beyazZemin?: boolean }) {
+// kapakta: kapak sahnesinin (BlogKapak) zemini temadan bağımsız olduğu için sayfa renkleri yerine --ks-* kullanılır.
+// Bağlantının içinde `group` ile durursa üstüne gelince ok çapraz çıkıp karşıdan girer (ok-ic).
+function OkDairesi({ boyut = 44, kapakta = false }: { boyut?: number; kapakta?: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex shrink-0 items-center justify-center rounded-full border-2 ${beyazZemin ? "border-black bg-[#7a6548]" : "border-yazi bg-vurgu"}`}
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 ${kapakta ? "ok-gir border-[var(--ks-ok-bd)] bg-[var(--ks-ok-bg)]" : "border-yazi bg-vurgu"}`}
       style={{ width: boyut, height: boyut }}
     >
-      <svg width={boyut * 0.4} height={boyut * 0.4} viewBox="0 0 20 20">
-        <path d="M5 15L15 5M7 5h8v8" fill="none" strokeWidth={2.6} strokeLinecap="square" style={{ stroke: beyazZemin ? "#fff" : "var(--si)" }} />
-      </svg>
+      <span className="ok-ic inline-flex">
+        <svg width={boyut * 0.4} height={boyut * 0.4} viewBox="0 0 20 20">
+          <path d="M5 15L15 5M7 5h8v8" fill="none" strokeWidth={2.6} strokeLinecap="square" style={{ stroke: kapakta ? "var(--ks-ok-yazi)" : "var(--si)" }} />
+        </svg>
+      </span>
     </span>
   );
 }
 
 function BlogdaOneCikan() {
   return (
-    <section aria-label="Blogda öne çıkan" className="px-[clamp(16px,5vw,70px)] pt-[44px] pb-8">
+    <section aria-label="Blogda öne çıkan" className="px-(--kenar) pt-[44px] pb-8">
       <div className="relative">
         <BlogKapak
           ad="Zara parfümleri"
           sise={ZARA_SISELER}
           baslik={
-            <h1 className="genis m-0 text-[clamp(22px,2.6vw,34px)] leading-[1.3] [word-spacing:.2em]">
-              <Link to={ONE_CIKAN_BLOG.yol} aria-label={`${ONE_CIKAN_BLOG.marka} ${ONE_CIKAN_BLOG.baslik}, yazıyı oku`} className="inline-flex items-center gap-5 text-black no-underline">
-                <span>
-                  <span className="text-[#7a6548]">{ONE_CIKAN_BLOG.marka}</span> {ONE_CIKAN_BLOG.baslik}
+            <h1 className="m-0">
+              <Link to={ONE_CIKAN_BLOG.yol} aria-label={`${ONE_CIKAN_BLOG.marka} ${ONE_CIKAN_BLOG.baslik}, yazıyı oku`} className="kapak-baslik group inline-flex items-start gap-[clamp(12px,2vw,28px)] text-[var(--ks-yazi)] no-underline">
+                <span className="flex flex-col">
+                  <span className="kapak-marka text-[clamp(64px,11vw,148px)] leading-[0.95]">{ONE_CIKAN_BLOG.marka}</span>
+                  <span className="kapak-alt text-[clamp(26px,4.6vw,64px)] leading-[1.1]">{ONE_CIKAN_BLOG.baslik}</span>
                 </span>
-                <OkDairesi beyazZemin />
+                <span className="mt-[clamp(4px,1vw,14px)]">
+                  <OkDairesi kapakta />
+                </span>
               </Link>
             </h1>
           }
@@ -68,7 +74,7 @@ function BlogdaOneCikan() {
 
 function AramaSonuclari({ parfumler, ara }: { parfumler: ParfumListe[]; ara: string }) {
   return (
-    <section aria-label="Arama sonuçları" className="px-[clamp(16px,5vw,70px)] pt-[70px] pb-[60px]">
+    <section aria-label="Arama sonuçları" className="px-(--kenar) pt-[70px] pb-[60px]">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <h1 className="genis m-0 text-[clamp(30px,3.6vw,48px)]">
           <span className="text-vurgu">arama</span> sonuçları
@@ -126,7 +132,7 @@ function BuHaftaEnPopuler({ populerler, toplamSayi }: { populerler: ParfumListe[
   }));
 
   return (
-    <section aria-label="En popüler parfümler" className="relative px-[clamp(16px,5vw,70px)] pt-6 pb-14">
+    <section aria-label="En popüler parfümler" className="relative px-(--kenar) pt-6 pb-14">
       <p className="kucuk m-0 mb-3 text-right text-soluk max-[760px]:hidden">{populerler.length} parfüm · sekmeye dokun</p>
 
       {populerVeri.length === 0 ? (
@@ -146,8 +152,8 @@ function BuHaftaEnPopuler({ populerler, toplamSayi }: { populerler: ParfumListe[
 
 function SevdiginKoku() {
   return (
-    <section aria-label="Sevdiğin koku" className="relative border-t-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] pt-[76px] pb-[70px]">
-      <YildizPatlamasi boyut={70} className="absolute top-[70px] right-[clamp(16px,5vw,70px)] max-[760px]:hidden" />
+    <section aria-label="Sevdiğin koku" className="relative border-t-[1.5px] border-yazi px-(--kenar) pt-[76px] pb-[70px]">
+      <YildizPatlamasi boyut={70} className="absolute top-[70px] right-(--kenar) max-[760px]:hidden" />
       <h2 className="genis relative z-[2] m-0 max-w-[820px] text-[clamp(32px,4.2vw,56px)] leading-[1.3] [word-spacing:.35em]">
         Sevdiğin koku,
         <br />

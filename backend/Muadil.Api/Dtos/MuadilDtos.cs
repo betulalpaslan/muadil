@@ -12,7 +12,10 @@ public record MuadilDto(
     decimal Fiyat,
     int KalicilikPuani,
     int BenzerlikPuani,
-    string UrunLinki);
+    string UrunLinki,
+    // Kullanıcı değerlendirmeleri (1-5); editör puanlarından ayrıdır
+    double? DegerlendirmeOrtalamasi = null,
+    int DegerlendirmeSayisi = 0);
 
 public record MuadilKaydetDto(
     [Range(1, int.MaxValue)] int MarkaId,

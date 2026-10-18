@@ -30,7 +30,7 @@ export default function NotalarSayfasi() {
 
   return (
     <>
-      <section aria-label="Notalar" className="px-[clamp(16px,5vw,70px)] pt-10 pb-16">
+      <section aria-label="Notalar" className="px-(--kenar) pt-10 pb-16">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <h1 className="genis m-0 text-[clamp(30px,3.6vw,48px)] leading-[1.3] [word-spacing:.2em]">
             <span className="text-vurgu">tüm</span> notalar

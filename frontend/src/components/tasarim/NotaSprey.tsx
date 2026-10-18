@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, MouseEvent, PointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { gorselAdresi } from "../../gorsel";
 import type { NotaKatmani, ParfumNota } from "../../types";
 import ParfumSisesi, { DELIK } from "./ParfumSisesi";
@@ -17,6 +18,10 @@ const KATMANLAR: { katman: NotaKatmani; baslik: string; basla: number }[] = [
 
 const SISE_GENISLIK = 56;
 const PARILTI_SAYISI = 72;
+const KART_GENISLIK = 240;
+
+// Notanın üstüne gelince çıkan açıklama kartı; x, üst, alt: notanın ekrandaki konumu (px)
+type Kart = { ad: string; metin: string; x: number; ust: number; alt: number };
 
 // Her nota 88px'lik bir sütun (ikon + ad). Katmanlar aşağı indikçe genişler (2, 3, 4 nota yan yana);
 // böylece liste bir koku piramidinin kesitini andırır.
@@ -62,8 +67,33 @@ export default function NotaSprey({
   const [basili, setBasili] = useState(false);
   const [sayac, setSayac] = useState(0);
   const [tiklandi, setTiklandi] = useState(false);
+  const [kart, setKart] = useState<Kart | null>(null);
   const zamanlayicilar = useRef<number[]>([]);
   const bolum = useRef<HTMLElement>(null);
+
+  function kartAc(el: HTMLElement, ad: string, metin: string) {
+    const r = el.getBoundingClientRect();
+    setKart({ ad, metin, x: r.left + r.width / 2, ust: r.top, alt: r.bottom });
+  }
+
+  // Fare notadan ayrılınca kart kapanır. Dokunmatikte notaya dokununca açılır; kart konumu sabit olduğundan
+  // kaydırınca ya da kart dışına dokununca kapanır.
+  const kartAcik = kart !== null;
+  useEffect(() => {
+    if (!kartAcik) return;
+    const kapat = () => setKart(null);
+    const disaridaKapat = (e: globalThis.PointerEvent) => {
+      if (!(e.target as Element).closest?.("[data-nota-kart]")) kapat();
+    };
+    window.addEventListener("scroll", kapat, { passive: true, capture: true });
+    window.addEventListener("resize", kapat);
+    document.addEventListener("pointerdown", disaridaKapat);
+    return () => {
+      window.removeEventListener("scroll", kapat, { capture: true });
+      window.removeEventListener("resize", kapat);
+      document.removeEventListener("pointerdown", disaridaKapat);
+    };
+  }, [kartAcik]);
 
   function temizle() {
     zamanlayicilar.current.forEach(clearTimeout);
@@ -158,7 +188,14 @@ export default function NotaSprey({
           },
           [[]]
         );
-        return { id: n.notaId, ad: n.notaAd, gorsel: gorselAdresi(n.gorselUrl ?? null), ikonStil, adKelimeleri };
+        return {
+          id: n.notaId,
+          ad: n.notaAd,
+          aciklama: n.aciklama?.trim() || null,
+          gorsel: gorselAdresi(n.gorselUrl ?? null),
+          ikonStil,
+          adKelimeleri,
+        };
       });
     return { ...k, kelimeler };
   }).filter((k) => k.kelimeler.length > 0);
@@ -200,6 +237,23 @@ export default function NotaSprey({
   });
 
   const yukseklik = Math.round((SISE_GENISLIK * 260) / 240);
+
+  // Fare üstüne gelince açılır, ayrılınca kapanır; dokunmatikte dokunuş açar (kapatmayı yukarıdaki efekt yapar)
+  const kartOlaylari = (ad: string, metin: string) => ({
+    onPointerEnter: (e: PointerEvent<HTMLElement>) => {
+      if (e.pointerType !== "touch") kartAc(e.currentTarget, ad, metin);
+    },
+    onPointerLeave: (e: PointerEvent<HTMLElement>) => {
+      if (e.pointerType !== "touch") setKart(null);
+    },
+    onClick: (e: MouseEvent<HTMLElement>) => kartAc(e.currentTarget, ad, metin),
+  });
+
+  // Kart notanın üstünde durur; yer yoksa altında. Yatayda ekran dışına taşmaz, ok notayı gösterir.
+  const kartSol = kart
+    ? Math.max(8, Math.min(kart.x - KART_GENISLIK / 2, window.innerWidth - KART_GENISLIK - 8))
+    : 0;
+  const kartUstte = kart ? kart.ust > 160 : true;
 
   return (
     <section ref={bolum} aria-labelledby="notalar-baslik" className="flex flex-col">
@@ -257,10 +311,17 @@ export default function NotaSprey({
             <div className={`mx-auto flex flex-col items-center gap-2 ${duz ? "max-w-[380px]" : PIRAMIT_GENISLIK[k.katman]}`}>
               <span className={`kucuk ${panel ? "text-[11px]" : "text-[9px]"} ${vurgu}`}>[{k.baslik}]</span>
               {/* Ekran okuyucu için düz metin; animasyonlu harfler gizli */}
-              <span className="sr-only">{k.kelimeler.map((w) => w.ad).join(", ")}</span>
+              <span className="sr-only">
+                {k.kelimeler.map((w) => (w.aciklama ? `${w.ad}: ${w.aciklama}` : `${w.ad}.`)).join(" ")}
+              </span>
               <div className="flex flex-wrap justify-center gap-x-1.5 gap-y-4" aria-hidden="true">
                 {k.kelimeler.map((w) => (
-                  <div key={w.id} className="flex w-[88px] flex-col items-center gap-2">
+                  <div
+                    key={w.id}
+                    data-nota-kart
+                    className={`flex w-[88px] flex-col items-center gap-2 ${w.aciklama ? "cursor-help hover:text-vurgu" : ""}`}
+                    {...(w.aciklama ? kartOlaylari(w.ad, w.aciklama) : {})}
+                  >
                     <span style={w.ikonStil} className="inline-flex">
                       {w.gorsel ? (
                         <img
@@ -294,6 +355,34 @@ export default function NotaSprey({
           </div>
         ))}
       </div>
+
+      {/* Ekran okuyucu açıklamayı yukarıdaki sr-only metinden okur; kart yalnız görsel. Portal: üstteki
+          overflow-hidden kapsayıcılar kartı kırpmasın. */}
+      {kart &&
+        createPortal(
+          <div
+            data-nota-kart
+            aria-hidden="true"
+            className="kart-gir pointer-events-none fixed z-50 bg-yazi px-4 py-3 text-left text-zemin shadow-[0_14px_30px_rgb(0_0_0/0.4)]"
+            style={{
+              left: kartSol,
+              width: KART_GENISLIK,
+              maxWidth: "calc(100vw - 16px)",
+              ...(kartUstte ? { bottom: window.innerHeight - kart.ust + 10 } : { top: kart.alt + 10 }),
+            }}
+          >
+            <span
+              className="absolute h-2.5 w-2.5 rotate-45 bg-yazi"
+              style={{
+                left: Math.max(14, Math.min(kart.x - kartSol, KART_GENISLIK - 14)) - 5,
+                ...(kartUstte ? { bottom: -5 } : { top: -5 }),
+              }}
+            />
+            <span className="kucuk block text-vurgu-ters">{kart.ad}</span>
+            <p className="m-0 mt-1.5 text-[13px] leading-[1.6] font-medium">{kart.metin}</p>
+          </div>,
+          document.body
+        )}
     </section>
   );
 }

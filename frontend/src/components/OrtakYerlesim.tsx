@@ -51,7 +51,7 @@ function AramaKutusu() {
   }
 
   return (
-    <form role="search" onSubmit={gonder} className="m-0 flex items-center gap-2.5 border-b-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] py-[18px]">
+    <form role="search" onSubmit={gonder} className="m-0 flex items-center gap-2.5 border-b-[1.5px] border-[var(--cz)] px-(--kenar) py-[18px]">
       <label htmlFor="ust-ara" className="sr-only">
         Parfüm, marka ya da muadil kodu ara
       </label>
@@ -66,17 +66,18 @@ function AramaKutusu() {
           value={deger}
           onChange={(e) => setDeger(e.target.value)}
           placeholder="PARFÜM, MARKA YA DA KOD"
-          className="h-[58px] w-full min-w-0 rounded-full border-[1.5px] border-yazi bg-transparent py-0 pr-5 pl-[54px] text-[11px] font-semibold tracking-[0.18em] text-yazi"
+          className="h-[58px] w-full min-w-0 rounded-full border-[1.5px] border-[var(--cz-arama)] bg-yuzey py-0 pr-5 pl-[54px] text-[11px] font-medium tracking-[0.16em] text-yazi"
         />
       </div>
-      <button type="submit" className="kucuk h-[58px] rounded-full bg-yazi px-[clamp(18px,3vw,30px)] font-extrabold text-zemin">
+      <button type="submit" className="kucuk h-[58px] rounded-full px-[clamp(18px,3vw,30px)] font-bold text-[var(--btn-fg)] [background:var(--btn-bg)]">
         ara
       </button>
     </form>
   );
 }
 
-const MENU_HAP = "kucuk inline-flex min-h-[34px] items-center rounded-full bg-yazi px-4 font-extrabold text-zemin no-underline";
+const MENU_HAP =
+  "kucuk inline-flex min-h-[34px] items-center rounded-full border-[1.5px] border-[var(--hap-bd)] bg-[var(--hap-bg)] px-4 font-bold text-[var(--hap-fg)] no-underline";
 const MENU_LINK = "kucuk inline-flex min-h-11 items-center text-yazi no-underline";
 const MENU_PASIF = "kucuk inline-flex min-h-11 items-center text-yazi opacity-50 max-[760px]:hidden";
 
@@ -88,10 +89,11 @@ export function Header({ adminMi }: { adminMi: boolean }) {
   const notalarAktif = location.pathname === "/notalar";
   const anaSayfaAktif = location.pathname === "/" || location.pathname.startsWith("/parfum/");
   const yonetimAktif = location.pathname.startsWith("/admin");
+  const favorilerAktif = location.pathname === "/favorilerim";
 
   return (
     <header className="bg-zemin text-yazi">
-      <div className="flex items-baseline justify-between gap-3 px-[clamp(16px,5vw,70px)] pt-[22px] pb-3.5">
+      <div className="flex items-baseline justify-between gap-3 px-(--kenar) pt-[22px] pb-3.5">
         <Link to="/" aria-label="muadil ana sayfa" className="no-underline text-yazi">
           <Logo boyut="26px" />
         </Link>
@@ -103,7 +105,7 @@ export function Header({ adminMi }: { adminMi: boolean }) {
         </div>
       </div>
 
-      <nav aria-label="Ana menü" className="flex min-h-16 items-center justify-between gap-2.5 border-y-[1.5px] border-yazi px-[clamp(16px,5vw,70px)]">
+      <nav aria-label="Ana menü" className="flex min-h-16 flex-wrap items-center justify-between gap-x-2.5 border-y-[1.5px] border-[var(--cz)] px-(--kenar)">
         <Link to="/" aria-current={anaSayfaAktif ? "page" : undefined} className={anaSayfaAktif ? MENU_HAP : MENU_LINK}>
           ana sayfa
         </Link>
@@ -116,6 +118,11 @@ export function Header({ adminMi }: { adminMi: boolean }) {
         <span className={MENU_PASIF} aria-disabled="true">
           blog
         </span>
+        {auth.isAuthenticated && (
+          <Link to="/favorilerim" aria-current={favorilerAktif ? "page" : undefined} className={favorilerAktif ? MENU_HAP : MENU_LINK}>
+            favorilerim
+          </Link>
+        )}
         {adminMi && (
           <Link to="/admin" aria-current={yonetimAktif ? "page" : undefined} className={yonetimAktif ? MENU_HAP : MENU_LINK}>
             yönetim
@@ -150,7 +157,7 @@ export function Footer() {
   const tarih = bugun.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <footer className="flex flex-wrap items-end justify-between gap-4 border-t-[1.5px] border-yazi px-[clamp(16px,5vw,70px)] pt-[34px] pb-10 text-yazi">
+    <footer className="flex flex-wrap items-end justify-between gap-4 border-t-[1.5px] border-yazi px-(--kenar) pt-[34px] pb-10 text-yazi">
       <div className="flex flex-col gap-1">
         <span className="text-sm font-extrabold tracking-[0.06em] uppercase">{gun}</span>
         <span className="text-sm">{tarih}</span>

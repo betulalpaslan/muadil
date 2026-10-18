@@ -94,21 +94,26 @@ export default function PopulerSekmeler({ parfumler }: { parfumler: PopulerParfu
           <span className="genis text-[15px]">
             <span className="text-vurgu-ters">{p.muadiller.length} muadil</span> · en uygun {p.enUygun}
           </span>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {p.muadiller.map((m) => (
-              <span key={m.marka + m.kod} className="inline-flex min-h-[52px] flex-col justify-center gap-0.5 rounded-full border-[1.5px] border-zemin px-[22px]">
-                <span className="kucuk text-[8px] opacity-60">{m.marka}</span>
-                <span className="text-[15px] font-bold tracking-[.1em]">
-                  {m.kod} <span className="text-[11px] font-medium opacity-70">{m.fiyat}</span>
+              <span key={m.marka + m.kod} className="inline-flex min-h-[76px] flex-col justify-center gap-1 rounded-full border-2 border-zemin px-8">
+                <span className="kucuk text-[11px] opacity-70">{m.marka}</span>
+                <span className="text-[22px] leading-none font-bold tracking-[.08em]">
+                  {m.kod} <span className="text-[15px] font-medium opacity-80">{m.fiyat}</span>
                 </span>
               </span>
             ))}
           </div>
-          <Link to={`/parfum/${p.id}`} className="kucuk inline-flex min-h-12 items-center gap-3 self-start rounded-full bg-zemin px-[26px] text-yazi no-underline">
+          <Link
+            to={`/parfum/${p.id}`}
+            className="kucuk inline-flex min-h-16 items-center gap-4 self-start rounded-full bg-zemin py-2 pr-2.5 pl-9 text-[14px] font-extrabold tracking-[.2em] text-yazi no-underline transition-transform hover:scale-[1.03]"
+          >
             detaya git
-            <svg width="12" height="12" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M5 15L15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="2.6" />
-            </svg>
+            <span aria-hidden="true" className="inline-flex size-11 items-center justify-center rounded-full bg-yazi text-zemin">
+              <svg width="18" height="18" viewBox="0 0 20 20">
+                <path d="M5 15L15 5M7 5h8v8" fill="none" stroke="currentColor" strokeWidth="2.6" />
+              </svg>
+            </span>
           </Link>
         </div>
       </div>
