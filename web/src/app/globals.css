@@ -1,0 +1,924 @@
+@import "tailwindcss";
+@import "@fontsource/roboto/300.css";
+@import "@fontsource/roboto/400.css";
+@import "@fontsource/roboto/500.css";
+@import "@fontsource/roboto/700.css";
+@import "@fontsource/roboto/900.css";
+
+/*
+  Tasarım: cam kartlar + akan dalga çizgileri. Üç palet, <html data-palet="gul|gece|adacayi"> ile seçilir
+  (varsayılan: gül). Dev widget → Tasarım → "Palet". Değişken adları (--gold*, --inv*) eski paletten kalma;
+  burada "vurgu rengi" anlamındadır. --ac: vurgunun r g b değeri (saydam gölge/parıltılar için).
+*/
+:root {
+  --bg: #f5e8e6;
+  --bg2: #ecd5d8;
+  --bg-img: radial-gradient(circle 170px at 88% 42%, rgb(255 255 255 / 0.7), transparent 70%), radial-gradient(circle 120px at 79% 64%, rgb(255 255 255 / 0.55), transparent 70%), radial-gradient(circle 140px at 95% 26%, rgb(255 255 255 / 0.6), transparent 70%), linear-gradient(105deg, #f8f0e4 0%, #f7ebe2 38%, #f3dfda 70%, #efd3d3 100%);
+  --ink: #3a1230;
+  --paper: rgb(255 251 250 / 0.9);
+  --muted: #8a6b78;
+  --ac: 94 26 64;
+  --gold: #7b2d57;
+  --gold-hi: #5e1a40;
+  --gold-lo: #c79ab0;
+  --accent: var(--gold-hi);
+  --onaccent: #ffffff;
+  --gold-grad: linear-gradient(135deg, #7b2d57 0%, #5e1a40 55%, #3f0f2c 100%);
+  --gold-surf: linear-gradient(135deg, #6c2350 0%, #4d1235 100%);
+  --btn: linear-gradient(135deg, #6c2350, #4a1233);
+  --btnfg: #ffffff;
+  --line: rgb(var(--ac) / 0.16);
+  --surf: rgb(var(--ac) / 0.06);
+  --track: rgb(var(--ac) / 0.14);
+  /* Öne çıkan (en iyi eşleşme) kartı */
+  --inv: rgb(255 255 255 / 0.92);
+  --invfg: #3a1230;
+  --invmuted: #8a6b78;
+  --invaccent: #5e1a40;
+  --invtrack: rgb(94 26 64 / 0.14);
+  --invline: rgb(94 26 64 / 0.16);
+  --vs-bg: radial-gradient(circle at 50% 30%, #7d2d58, #451030);
+  --footer: rgb(255 255 255 / 0.35);
+  --shadow: rgb(94 26 64 / 0.16);
+  --cam: rgb(255 251 250 / 0.9);
+  --cam-sinir: rgb(255 255 255 / 0.75);
+  --dalga: #6c2350;
+  --r-sm: 6px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-pill: 999px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --serif: "Roboto", system-ui, sans-serif;
+  --sans: "Roboto", system-ui, sans-serif;
+  --p1: #3a1230;
+  --p2: #8a6b78;
+  color-scheme: light;
+}
+:root[data-palet="gece"] {
+  --bg: #160a14;
+  --bg2: #2b1030;
+  --ink: #f6e6ee;
+  --paper: rgb(46 20 44 / 0.9);
+  --muted: #b99aab;
+  --ac: 232 160 196;
+  --gold: #e6a6c6;
+  --gold-hi: #f4c3da;
+  --gold-lo: #7a3a62;
+  --gold-grad: linear-gradient(135deg, #f4c3da 0%, #e6a6c6 55%, #b9709a 100%);
+  --gold-surf: linear-gradient(135deg, #c9578f 0%, #8e2f64 100%);
+  --btn: linear-gradient(135deg, #c9578f, #8e2f64);
+  --btnfg: #ffffff;
+  --inv: rgb(70 30 66 / 0.92);
+  --invfg: #f6e6ee;
+  --invmuted: #b99aab;
+  --invaccent: #f4c3da;
+  --invtrack: rgb(244 195 218 / 0.18);
+  --invline: rgb(244 195 218 / 0.2);
+  --vs-bg: radial-gradient(circle at 50% 30%, #b3487f, #4b1238);
+  --footer: rgb(0 0 0 / 0.28);
+  --shadow: rgb(0 0 0 / 0.5);
+  --cam: rgb(46 20 44 / 0.9);
+  --cam-sinir: rgb(255 255 255 / 0.12);
+  --dalga: #e6a6c6;
+  --p1: #f6e6ee;
+  --p2: #b99aab;
+  color-scheme: dark;
+}
+:root[data-palet="adacayi"] {
+  --bg: #eaf0e6;
+  --bg2: #d3e2d2;
+  --ink: #17301f;
+  --muted: #657a6a;
+  --ac: 38 92 64;
+  --gold: #2f6b4b;
+  --gold-hi: #1f4f36;
+  --gold-lo: #9fc2ab;
+  --gold-grad: linear-gradient(135deg, #2f6b4b 0%, #1f4f36 55%, #123824 100%);
+  --gold-surf: linear-gradient(135deg, #2a6244 0%, #17402b 100%);
+  --btn: linear-gradient(135deg, #2a6244, #17402b);
+  --inv: rgb(255 255 255 / 0.92);
+  --invfg: #17301f;
+  --invmuted: #657a6a;
+  --invaccent: #1f4f36;
+  --invtrack: rgb(31 79 54 / 0.14);
+  --invline: rgb(31 79 54 / 0.16);
+  --vs-bg: radial-gradient(circle at 50% 30%, #2f7a53, #123824);
+  --shadow: rgb(31 79 54 / 0.16);
+  --dalga: #2a6244;
+  --p1: #17301f;
+  --p2: #657a6a;
+}
+
+@theme inline {
+  --color-zemin: var(--bg);
+  --color-yazi: var(--ink);
+  --color-vurgu: var(--gold-hi);
+  --color-yuzey: var(--paper);
+  --color-soluk: var(--muted);
+  --font-sans: "Roboto", system-ui, sans-serif;
+  --font-serif: "Roboto", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    var(--bg-img, none),
+    radial-gradient(900px 520px at 12% -8%, rgb(var(--ac) / 0.1), transparent 65%),
+    radial-gradient(800px 520px at 100% 30%, rgb(var(--ac) / 0.12), transparent 65%),
+    linear-gradient(180deg, transparent 40%, var(--bg2));
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+input::placeholder {
+  color: var(--muted);
+}
+
+.sayfa {
+  position: relative;
+  z-index: 1;
+  overflow-x: clip;
+}
+
+/* Sayfanın arkasındaki ipek dalgalar (layout'ta bir kez çizilir) */
+.zemin-dalga {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  color: var(--dalga);
+}
+.zemin-dalga svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Cam yüzey: yarı saydam, bulanık arka plan, ince beyaz kenar */
+.cam {
+  background: var(--cam);
+  border: 1px solid var(--cam-sinir);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    0 14px 40px var(--shadow),
+    inset 0 1px 0 rgb(255 255 255 / 0.5);
+}
+
+/* Küçük, geniş harf aralıklı etiketler */
+.kucuk {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Başlıklar: Roboto */
+.genis {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.serif {
+  font-family: var(--serif);
+}
+
+.altin-yazi {
+  background: var(--gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Düğme: altın degrade, üzerine gelince parlama kayar */
+.dugme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--btn);
+  color: var(--btnfg);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgb(var(--ac) / 0.28);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-position 0.7s var(--ease),
+    box-shadow 0.3s,
+    transform 0.2s;
+}
+.dugme:hover {
+  background-position: 100% 0;
+  box-shadow: 0 0 26px rgb(var(--ac) / 0.35);
+  color: var(--btnfg);
+}
+.dugme:active {
+  transform: scale(0.97);
+}
+
+/* Konturlu çip */
+.cip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    transform 0.3s var(--ease),
+    border-color 0.3s,
+    color 0.3s,
+    box-shadow 0.3s;
+}
+.cip:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  box-shadow: 0 6px 18px rgb(var(--ac) / 0.12);
+}
+
+/* Yansıma: yüzeyin üstünden geçen çapraz ışık */
+.isilti {
+  position: relative;
+  overflow: hidden;
+}
+.isilti::after {
+  content: "";
+  position: absolute;
+  inset: -10% 0;
+  background: linear-gradient(105deg, transparent 38%, rgb(230 205 150 / 0.2) 48%, rgb(240 225 185 / 0.38) 50%, rgb(230 205 150 / 0.2) 52%, transparent 62%);
+  transform: translateX(-130%);
+  animation: yansima 6s ease-in-out infinite;
+  pointer-events: none;
+}
+.isilti.g2::after {
+  animation-delay: 1.2s;
+}
+.isilti.g3::after {
+  animation-delay: 2.4s;
+}
+@keyframes yansima {
+  0%,
+  50% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+/* Logo: altın parıltı */
+.parilti {
+  background: linear-gradient(105deg, var(--gold) 0%, var(--gold) 38%, var(--gold-hi) 46%, var(--gold-lo) 50%, var(--gold-hi) 54%, var(--gold) 62%, var(--gold) 100%) 0 0 / 250% 100% no-repeat;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: parilti 6s ease-in-out 1s infinite;
+}
+@keyframes parilti {
+  0%,
+  55% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* Üst bant gezinme bağlantısı: altın alt çizgi soldan açılır */
+.nav-a {
+  position: relative;
+  padding: 4px 0;
+  text-decoration: none;
+}
+.nav-a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gold-grad);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease);
+}
+.nav-a:hover {
+  color: var(--gold-hi);
+}
+.nav-a:hover::after {
+  transform: scaleX(1);
+}
+.ikon {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgb(var(--ac) / 0.06);
+  color: var(--gold-hi);
+  cursor: pointer;
+  transition:
+    transform 0.3s var(--ease),
+    background 0.3s,
+    color 0.3s,
+    box-shadow 0.3s;
+}
+.ikon:hover {
+  transform: translateY(-3px) rotate(-8deg);
+  background: var(--gold-surf);
+  color: var(--btnfg);
+  box-shadow: 0 8px 24px rgb(var(--ac) / 0.3);
+}
+
+/* Arama kutusu odak halesi */
+.arama {
+  transition:
+    border-color 0.3s,
+    box-shadow 0.4s;
+}
+.arama:focus-within {
+  border-color: var(--gold) !important;
+  box-shadow:
+    0 0 0 4px rgb(var(--ac) / 0.12),
+    0 0 40px rgb(var(--ac) / 0.12);
+}
+
+/* Giriş animasyonları */
+.rise {
+  animation: rise 0.9s var(--ease) both;
+  animation-delay: var(--dl, 0s);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+.kay {
+  animation: kay 0.9s var(--ease) both;
+  animation-delay: var(--dl, 0s);
+}
+@keyframes kay {
+  from {
+    opacity: 0;
+    translate: 28px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Hero */
+/* Çocuklara z-index verme: .arka-dalga (z -1) .sayfa katmanına inip header/çiplerin altında kalmalı */
+.hero {
+  position: relative;
+}
+
+/* Merkez daire: cam halka içinde vurgu renginde "VS" */
+.isik {
+  filter: drop-shadow(0 0 18px rgb(var(--ac) / 0.35));
+}
+.orbit {
+  transform-origin: 110px 216px;
+  animation: orbit 30s linear infinite;
+}
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.vs {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -52px 0 0 -52px;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: var(--vs-bg);
+  box-shadow:
+    0 0 0 9px rgb(255 255 255 / 0.28),
+    0 0 0 10px rgb(255 255 255 / 0.5),
+    0 14px 40px rgb(var(--ac) / 0.4),
+    inset 0 2px 6px rgb(255 255 255 / 0.25);
+  animation: rise 0.9s var(--ease) 0.3s both;
+}
+.vs::after {
+  content: "";
+  position: absolute;
+  inset: -22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--ac) / 0.18), transparent 68%);
+  z-index: -1;
+  animation: nabiz 3.4s ease-in-out infinite;
+}
+.ciz {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: ciz 1.5s var(--ease) both;
+  animation-delay: var(--dl, 0s);
+}
+@keyframes ciz {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.uc {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nabiz 2.6s ease-in-out infinite;
+  animation-delay: var(--dl, 0s);
+}
+@keyframes nabiz {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.7);
+    opacity: 0.6;
+  }
+}
+.gezgin {
+  filter: drop-shadow(0 0 4px var(--gold-hi));
+}
+
+
+/* Muadil satırı: üzerine gelince sola kayar, merkezden o satıra giden çizgi parlar */
+.satir {
+  position: relative;
+  transition:
+    transform 0.35s var(--ease),
+    border-color 0.3s,
+    box-shadow 0.35s,
+    background 0.35s;
+}
+.satir:hover {
+  transform: translateX(-6px);
+  border-color: var(--gold) !important;
+  box-shadow:
+    0 10px 30px var(--shadow),
+    0 0 24px rgb(var(--ac) / 0.12);
+}
+.satir:hover .kutu-img {
+  transform: scale(1.14);
+}
+.kutu-img {
+  transition: transform 0.5s var(--ease);
+}
+.duzen:has(.satir:nth-child(1):hover) #y1,
+.duzen:has(.satir:nth-child(2):hover) #y2,
+.duzen:has(.satir:nth-child(3):hover) #y3,
+.duzen:has(.satir:nth-child(4):hover) #y4 {
+  stroke: var(--gold-hi);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 5px rgb(var(--ac) / 0.7));
+}
+#y1,
+#y2,
+#y3,
+#y4 {
+  transition:
+    stroke-width 0.3s,
+    filter 0.3s;
+}
+.en-iyi {
+  box-shadow: 0 12px 44px rgb(var(--ac) / 0.26);
+}
+.en-iyi::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--r-lg) + 2px);
+  border: 1px solid var(--gold);
+  opacity: 0;
+  animation: hale 2.8s ease-out 2s infinite;
+  pointer-events: none;
+}
+@keyframes hale {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.035, 1.22);
+    opacity: 0;
+  }
+}
+.parlak {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.parlak::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 240 210 / 0.32) 50%, transparent 62%);
+  transform: translateX(-110%);
+  animation: parla 5s ease-in-out 2s infinite;
+}
+@keyframes parla {
+  0%,
+  55% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(110%);
+  }
+}
+.yildiz {
+  display: inline-block;
+  font-style: normal;
+  animation: yildiz 3s ease-in-out infinite;
+}
+@keyframes yildiz {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.8) rotate(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(45deg);
+  }
+}
+
+/* Aktif çip nabzı */
+.cip-aktif {
+  position: relative;
+}
+.cip-aktif::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 2px solid rgb(var(--ac) / 0.55);
+  opacity: 0;
+  animation: cipNabiz 2.8s ease-out 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes cipNabiz {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(1.12, 1.35);
+    opacity: 0;
+  }
+}
+
+/* Öne çıkan eşleşme kartı */
+.eslesme {
+  transition:
+    transform 0.4s var(--ease),
+    background 0.35s,
+    box-shadow 0.35s;
+}
+.eslesme:hover {
+  transform: translateY(-6px);
+  background: rgb(var(--ac) / 0.05);
+  box-shadow:
+    0 18px 40px var(--shadow),
+    inset 0 0 0 1px var(--line);
+}
+
+/* Akış şeridi: canlı eşleşmeler (sağdan sola) + markalar (soldan sağa) */
+.akis-serit {
+  overflow: hidden;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.akis-serit + .akis-serit {
+  border-top: 1px solid var(--line);
+}
+.serit {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+  animation: serit 40s linear infinite;
+}
+.serit.ters {
+  animation: seritTers 34s linear infinite;
+}
+@keyframes serit {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes seritTers {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.tik {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  border-right: 1px solid var(--line);
+}
+.canli {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--gold-hi);
+}
+.canli::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: canli 1.6s ease-in-out infinite;
+}
+@keyframes canli {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.45;
+  }
+}
+
+/* Hareketi azalt tercihi açıksa süs animasyonlarını kapat */
+@media (prefers-reduced-motion: reduce) {
+  .orbit,
+  .isik,
+  .parilti,
+  .hero::before,
+  .vs,
+  .vs::before,
+  .uc,
+  .en-iyi::before,
+  .parlak::before,
+  .yildiz,
+  .cip-aktif::after,
+  .serit,
+  .canli::before,
+  .rise,
+  .kay,
+  .ciz {
+    animation: none;
+  }
+  .ciz {
+    stroke-dashoffset: 0;
+  }
+  .isilti::after {
+    display: none;
+  }
+}
+
+/* Masaüstünde tasarım %80 ölçekte hazırlandı: ana sayfa tek ekrana sığsın. Mobilde ölçek 1. */
+@media (min-width: 900px) {
+  body {
+    zoom: 0.8;
+  }
+}
+
+/* Nota adı: ikonun altında, dar sütuna sığan küçük büyük harf */
+.nota-ad {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Nota ikonları koyu mürekkeple çizilmiş şeffaf PNG; koyu zeminde yazı rengine boyanır. */
+.nota-ikon {
+  filter: brightness(0) invert(0.93) sepia(0.08);
+}
+
+/* Nota açıklama kartı: notanın üstünde belirir (NotaSprey) */
+@keyframes kart-gir {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+.kart-gir {
+  animation: kart-gir 0.16s ease-out both;
+}
+
+/* Şişe: sayfa açılışında dışarıdan uçup gelir, sonra tıklanabilir olduğunu belli eden hafif sallanma; hover/basılıyken durur */
+@keyframes sallan {
+  0%,
+  100% {
+    transform: rotate(-6deg) scale(1);
+  }
+  50% {
+    transform: rotate(6deg) scale(1.05);
+  }
+}
+@keyframes ucgel {
+  from {
+    transform: translate(70vw, -40vh) rotate(35deg) scale(0.3);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+.oynak {
+  animation:
+    ucgel 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both,
+    sallan 1.4s ease-in-out 0.8s infinite;
+}
+.oynak:hover,
+.oynak:active {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oynak,
+  .kart-gir {
+    animation: none;
+  }
+}
+
+:root:not([data-palet="gece"]) .nota-ikon {
+  filter: none;
+}
+
+/* Metin bağlantısı düğmesi: altın, altı çizili, üzerine gelince harf aralığı açılır */
+.link-btn {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--ac) / 0.4);
+  text-underline-offset: 4px;
+  transition:
+    color 0.25s,
+    text-decoration-color 0.25s,
+    letter-spacing 0.35s var(--ease);
+}
+.link-btn:hover {
+  color: var(--gold-hi);
+  text-decoration-color: var(--gold-hi);
+  letter-spacing: 0.16em;
+}
+
+/* Ana sayfa: kart ızgarası ve cam kartlar */
+.cam-kart {
+  background: var(--cam);
+  border: 1px solid var(--cam-sinir);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    0 12px 32px var(--shadow),
+    inset 0 1px 0 rgb(255 255 255 / 0.5);
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s;
+}
+a.cam-kart:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 18px 40px var(--shadow),
+    inset 0 1px 0 rgb(255 255 255 / 0.5);
+}
+.etiket-hap {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.35);
+  padding: 3px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.cizgi-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.4);
+  backdrop-filter: blur(8px);
+  padding: 8px 26px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold-hi);
+  transition:
+    background 0.3s,
+    transform 0.3s var(--ease);
+}
+.cizgi-btn:hover {
+  background: rgb(255 255 255 / 0.7);
+  transform: translateY(-2px);
+}
+
+/* Parfüm çerçevesi: opak, aydınlık pano; ince çift kenar ve iç gölge ile "vitrin" etkisi */
+.cerceve {
+  position: relative;
+  z-index: 2;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgb(var(--ac) / 0.22);
+  box-shadow:
+    0 0 0 5px rgb(255 255 255 / 0.55),
+    0 0 0 6px rgb(var(--ac) / 0.18),
+    inset 0 2px 14px rgb(var(--ac) / 0.1),
+    0 10px 24px var(--shadow);
+}
+
+
+/*
+  Ana sayfa arka planı (ipek dalga). VS'ye bağlı konumlanır: görselin kırılma noktası
+  (genişliğin %47.24'ü, yüksekliğin %60.87'si = genişliğin %33.97'si) VS merkezine denk gelir.
+  z -1 ile .sayfa katmanının en altına iner; kenarları zemin rengine solar. Paletle uyumlu renk.
+*/
+.arka-dalga {
+  /* boyut/konum karsilastirma.tsx'te satır içi */
+  mask-image:
+    linear-gradient(180deg, transparent, #000 12%, #000 70%, transparent),
+    linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent, #000 12%, #000 70%, transparent),
+    linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-composite: source-in;
+}
+:root[data-palet="gece"] .arka-dalga {
+  filter: invert(0.92) hue-rotate(180deg) saturate(1.3);
+  opacity: 0.85;
+}
+:root[data-palet="adacayi"] .arka-dalga {
+  filter: hue-rotate(105deg) saturate(0.9);
+}

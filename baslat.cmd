@@ -1,8 +1,8 @@
 @echo off
-REM Muadil gelistirme ortamini tek tikla baslatir
-cd /d "%~dp0"
+REM Muadil web gelistirme ortamini tek tikla baslatir
+cd /d "%~dp0web"
 
-echo [1/3] PostgreSQL ve Keycloak baslatiliyor...
+echo [1/2] PostgreSQL baslatiliyor...
 docker compose up -d
 if errorlevel 1 (
   echo Docker calismiyor. Docker Desktop acik mi?
@@ -10,11 +10,8 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/3] API baslatiliyor...
-start "Muadil API" cmd /k dotnet watch run --project backend/Muadil.Api
-
-echo [3/3] React baslatiliyor...
-start "Muadil Frontend" cmd /k "cd frontend && npm run dev"
+echo [2/2] Next.js baslatiliyor...
+start "Muadil Web" cmd /k npm run dev
 
 timeout /t 8 /nobreak >nul
-start http://localhost:5173
+start http://localhost:3000

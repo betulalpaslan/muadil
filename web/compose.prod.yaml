@@ -1,0 +1,72 @@
+# Üretim: Caddy (otomatik TLS) -> Next.js -> Postgres
+# Dağıtım: ./deploy.sh
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: muadil
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: muadil
+    # Yalnızca sunucunun kendisinden erişilir (derleme ve yönetim betikleri için)
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U muadil"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    profiles: ["arac"]
+    build:
+      context: .
+      target: migrate
+    network_mode: host
+    environment:
+      DATABASE_URL: postgres://muadil:${POSTGRES_PASSWORD}@127.0.0.1:5432/muadil
+
+  web:
+    restart: unless-stopped
+    build:
+      context: .
+      target: calistir
+      # Derleme sırasında sunucudaki Postgres'e ulaşmak için ana makine ağı
+      network: host
+      args:
+        DATABASE_URL: ${BUILD_DATABASE_URL:-postgres://muadil:${POSTGRES_PASSWORD}@127.0.0.1:5432/muadil}
+        SITE_URL: https://${SITE_HOST}
+        SITE_INDEX: "1"
+    environment:
+      DATABASE_URL: postgres://muadil:${POSTGRES_PASSWORD}@postgres:5432/muadil
+      SITE_URL: https://${SITE_HOST}
+      YENILE_ANAHTARI: ${YENILE_ANAHTARI}
+      ADMIN_SIFRE: ${ADMIN_SIFRE}
+      UPLOAD_DIZINI: /uploads
+    # Yönetimden yüklenen görseller konteyner yeniden oluşturulunca kaybolmasın
+    volumes:
+      - uploads:/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_HOST: ${SITE_HOST}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - web
+
+volumes:
+  pg-data:
+  caddy-data:
+  uploads:

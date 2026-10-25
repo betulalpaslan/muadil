@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792340374746,
+      "tag": "0000_keen_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792340393152,
+      "tag": "0001_arama",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792569095556,
+      "tag": "0002_nota_katman_pk",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 @echo off
-REM PostgreSQL ve Keycloak container larini durdurur (veriler kalir)
-cd /d "%~dp0"
+REM PostgreSQL container ini durdurur (veriler kalir)
+cd /d "%~dp0web"
 docker compose stop
-echo Container lar durduruldu. API ve React pencerelerini kapatabilirsin.
+echo Container durduruldu. Next.js penceresini kapatabilirsin.
 pause

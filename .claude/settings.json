@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./**/node_modules/**)",
+      "Read(./**/dist/**)",
+      "Read(./**/.next/**)",
+      "Read(./**/bin/**)",
+      "Read(./**/obj/**)",
+      "Read(./**/uploads/**)",
+      "Read(./web/uploads-yedek/**)",
+      "Read(./*.log)",
+      "Read(./*.zip)",
+      "Read(./*.xlsx)",
+      "Read(./*.jpg)",
+      "Read(./**/package-lock.json)",
+      "Read(./**/tsconfig.tsbuildinfo)"
+    ]
+  }
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muadil Renk Paleti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #f5f4ef; color: #1f1e1d; font: 14px/1.4 "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { padding: 48px; display: flex; flex-direction: column; gap: 40px; max-width: 1240px; margin: 0 auto; }
+  h1 { font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -0.04em; }
+  .alt { margin-top: 10px; color: #6b6a68; max-width: 640px; }
+  h2.baslik { font-size: 13px; font-weight: 500; color: #6b6a68; margin-bottom: 12px; }
+
+  .temalar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+  .tema { padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,.12); display: flex; flex-direction: column; gap: 28px; }
+  .tema header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--cz); padding-bottom: 14px; }
+  .tema header b { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+  .tema header span { font-size: 11px; letter-spacing: .14em; color: var(--soluk); }
+  .grup > h3 { font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--soluk); margin-bottom: 10px; }
+
+  .renkler { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .renkler.iki { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .renkler.dort { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .kutu { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+  .kutu:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 3px; }
+  .ornek { height: 72px; border: 1px solid var(--cz); display: flex; align-items: flex-end; justify-content: flex-end; padding: 6px 8px; font-size: 11px; font-weight: 700; position: relative; }
+  .ornek i { font-style: normal; opacity: 0; transition: opacity .15s; }
+  .kutu.kopya .ornek i { opacity: 1; }
+  .ad { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 700; }
+  .ad em { font-style: normal; font-weight: 500; color: var(--soluk); font-variant-numeric: tabular-nums; }
+  .not { font-size: 11px; color: var(--soluk); line-height: 1.3; }
+  .not code { font: inherit; letter-spacing: .02em; }
+
+  .oran { display: flex; flex-wrap: wrap; gap: 8px; }
+  .oran span { font-size: 11px; font-weight: 600; padding: 6px 10px; border: 1px solid var(--cz); font-variant-numeric: tabular-nums; }
+  .oran b { font-weight: 800; }
+
+  .ort section { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); padding: 32px; }
+  .sabit { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .sabit .ornek { border-color: rgba(0,0,0,.1); }
+  .ipucu { margin-top: 14px; font-size: 12px; color: #6b6a68; }
+
+  .gece { --zemin: #0b0b0b; --yazi: #f2eee8; --vurgu: #d6bb8d; --soluk: #8a8580; --cz: rgb(242 238 232 / .16); background: var(--zemin); color: var(--yazi); }
+  .gunduz { --zemin: #f4f0e9; --yazi: #141212; --vurgu: #7a6548; --soluk: #6f6a64; --cz: rgb(20 18 18 / .22); background: var(--zemin); color: var(--yazi); }
+
+  @media (max-width: 900px) {
+    body { padding: 20px 16px; }
+    .temalar { grid-template-columns: 1fr; }
+    .renkler.dort { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    h1 { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<div>
+  <h1>Renk paleti.</h1>
+  <p class="alt">Muadil tasarım sistemi (K · Siyah dergi). Değerler <b>tasarim.css</b> ve <b>TASARIM.md</b>'den alındı. Bir renge dokun, kodu kopyalansın.</p>
+</div>
+
+<div class="temalar" id="temalar"></div>
+
+<div class="ort">
+  <section>
+    <h2 class="baslik">İki temada da aynı kalanlar</h2>
+    <div class="sabit" id="sabit"></div>
+    <p class="ipucu">Parfüm rengiyle boyanan görsel alanları (pastel) iki temada aynıdır; üstlerindeki şişe ve yazı hep #0B0B0B kalır. Zemin rengi <code>pastel(renk, 0.8)</code> ile üretilir.</p>
+  </section>
+</div>
+
+<script>
+// [ad, değişken, gece, gündüz, açıklama]  — değer "a|b" ise degrade/özel gösterim için ham CSS
+const TEMEL = [
+  ['zemin',       '--si',  '#0b0b0b', '#f4f0e9', 'sayfa zemini'],
+  ['yazi',        '--be',  '#f2eee8', '#141212', 'yazı, çizgi, çerçeve'],
+  ['vurgu',       '--ta',  '#d6bb8d', '#7a6548', 'şampanya: vurgu kelime, etiket'],
+  ['vurgu-ters',  '--ta2', '#7a6548', '#c8b497', 'ters bantlarda vurgu'],
+  ['yuzey',       '--gr',  '#1a1a1a', '#e3ddd3', 'görsel yeri, sekme hover'],
+  ['soluk',       '--gr2', '#8a8580', '#6f6a64', 'ikincil yazı'],
+];
+const PARILTI = [
+  ['p1',  '--p1',  '#d9dde2', '#8f959d', 'şişe parıltısı, açık'],
+  ['p2',  '--p2',  '#a9aeb5', '#6b7178', 'şişe parıltısı, koyu'],
+  ['p1t', '--p1t', '#8f959d', '#d9dde2', 'ters kutuda açık'],
+  ['p2t', '--p2t', '#6b7178', '#a9aeb5', 'ters kutuda koyu'],
+];
+const UST = [
+  ['çizgi',       '--cz',       'rgb(242 238 232 / .16)', '#141212', 'ince çizgi'],
+  ['arama çerçv.','--cz-arama', 'rgb(242 238 232 / .26)', '#141212', 'arama kutusu'],
+  ['düğme (ARA)', '--btn-bg',   'linear-gradient(135deg,#f1dfbd,#cfa970)', '#141212', 'dolu düğme'],
+  ['düğme yazı',  '--btn-fg',   '#1a1208', '#f4f0e9', 'ARA yazısı'],
+  ['etkin hap',   '--hap-bg',   'transparent', '#141212', 'menüde seçili'],
+  ['hap yazı',    '--hap-fg',   '#d6bb8d', '#f4f0e9', 'seçili menü yazısı'],
+  ['şerit',       '--serit-bg', 'linear-gradient(90deg,#17110a,#3a2a14 50%,#17110a)', 'transparent', 'kayan şerit'],
+  ['şerit yazı',  '--serit-fg', '#e8d2a8', '#141212', 'şerit metni'],
+  ['şerit çizgi', '--serit-bd', '#a87c43', '#141212', 'şerit kenarı'],
+];
+const SAHNE = [
+  ['sahne zemin', '--ks-bg',      '#0b0b0b', '#ffffff', 'blog kapağı'],
+  ['sahne yazı',  '--ks-yazi',    '#f2eee8', '#000000', ''],
+  ['marka 1',     '--ks-marka-1', '#c9a36a', '#5e4a2e', 'marka degradesi'],
+  ['marka 2',     '--ks-marka-2', '#fbefd0', '#b8975f', 'parlama'],
+  ['marka 3',     '--ks-marka-3', '#a87c43', '#7a6548', 'bronz'],
+  ['ok zemin',    '--ks-ok-bg',   '#d6bb8d', '#7a6548', 'kapak oku'],
+  ['ok yazı',     '--ks-ok-yazi', '#0b0b0b', '#ffffff', ''],
+  ['ışık',        '--ks-isik-1',  'rgb(232 188 108 / .55)', 'rgb(168 124 67 / .22)', 'arka ışık çekirdeği'],
+  ['ışık kenar',  '--ks-isik-2',  'rgb(168 118 58 / .24)',  'rgb(168 124 67 / .08)', ''],
+  ['parlama',     '--ks-vur',     'rgb(255 244 205 / .45)', 'rgb(168 124 67 / .18)', 'şişe değişince'],
+  ['gölge',       '--ks-golge',   '#a87c43', '#000000', 'ışık yansıması'],
+  ['ışıltı',      '--ks-isilti',  '#f3e2a9', '#a87c43', ''],
+];
+const SABIT = [
+  ['mürekkep', '#0b0b0b', 'pastel üstü yazı, şişe'],
+  ['şampanya', '#d6bb8d', 'gece vurgusu'],
+  ['bronz',    '#a87c43', 'şerit, gölge, ışık'],
+  ['kahve',    '#7a6548', 'gündüz vurgusu'],
+  ['kum',      '#c8b497', 'gündüz ters vurgu'],
+  ['krem',     '#f2eee8', 'gece yazısı'],
+];
+
+const hexe = s => /^#[0-9a-f]{6}$/i.test(s);
+function lum(h) {
+  const c = [1,3,5].map(i => parseInt(h.slice(i,i+2),16)/255)
+    .map(v => v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4));
+  return .2126*c[0] + .7152*c[1] + .0722*c[2];
+}
+function oran(a, b) {
+  const [x, y] = [lum(a), lum(b)].sort((p,q) => q-p);
+  return (x+.05)/(y+.05);
+}
+function yaziRengi(bg) { // örnek kutusu üstündeki etiket için okunur renk
+  if (!hexe(bg)) return 'inherit';
+  return lum(bg) > .35 ? '#0b0b0b' : '#ffffff';
+}
+function kutu(t, i, tema) {
+  const [ad, degisken, g, d, not] = t;
+  const v = tema === 'gece' ? g : d;
+  const kopya = hexe(v) ? v.toUpperCase() : v;
+  const kisa = hexe(v) ? v.toUpperCase() : (v.startsWith('linear') ? 'degrade' : v === 'transparent' ? 'şeffaf' : 'rgba');
+  return `<button class="kutu" data-kopya="${kopya.replace(/"/g,'&quot;')}" title="${degisken}: ${kopya}">
+    <span class="ornek" style="background:${v};color:${yaziRengi(v)}"><i>kopyalandı</i></span>
+    <span class="ad">${ad}<em>${kisa}</em></span>
+    <span class="not"><code>${degisken}</code>${not ? ' · ' + not : ''}</span>
+  </button>`;
+}
+function grup(baslik, liste, tema, sinif) {
+  return `<div class="grup"><h3>${baslik}</h3><div class="renkler ${sinif||''}">${liste.map(t => kutu(t, 0, tema)).join('')}</div></div>`;
+}
+function oranlar(tema) {
+  const i = tema === 'gece' ? 2 : 3;
+  const z = TEMEL[0][i], y = TEMEL[1][i];
+  const cift = [
+    ['yazı / zemin', y, z], ['vurgu / zemin', TEMEL[2][i], z],
+    ['soluk / zemin', TEMEL[5][i], z], ['yazı / yüzey', y, TEMEL[4][i]],
+  ];
+  return `<div class="grup"><h3>KONTRAST (WCAG)</h3><div class="oran">${cift.map(([n,a,b]) => {
+    const r = oran(a,b);
+    return `<span>${n} <b>${r.toFixed(1)}:1</b> · ${r>=7?'AAA':r>=4.5?'AA':r>=3?'büyük yazı':'zayıf'}</span>`;
+  }).join('')}</div></div>`;
+}
+function tema(adi, etiket, alt) {
+  return `<section class="tema ${adi}">
+    <header><b>${etiket}</b><span>${alt}</span></header>
+    ${grup('TEMEL', TEMEL, adi)}
+    ${grup('ŞİŞE PARILTISI', PARILTI, adi, 'dort')}
+    ${grup('ÜST BÖLGE · DÜĞME · ŞERİT', UST, adi)}
+    ${grup('BLOG KAPAĞI SAHNESİ', SAHNE, adi, 'dort')}
+    ${oranlar(adi)}
+  </section>`;
+}
+
+document.getElementById('temalar').innerHTML =
+  tema('gece', 'Gece', 'VARSAYILAN · data-tema yok') +
+  tema('gunduz', 'Gündüz', 'data-tema="gunduz"');
+
+document.getElementById('sabit').innerHTML = SABIT.map(([ad, h, not]) => `
+  <button class="kutu" data-kopya="${h.toUpperCase()}" title="${h.toUpperCase()}" style="--cz:rgba(0,0,0,.12);--vurgu:#7a6548;--soluk:#6f6a64">
+    <span class="ornek" style="background:${h};color:${yaziRengi(h)}"><i>kopyalandı</i></span>
+    <span class="ad">${ad}<em>${h.toUpperCase()}</em></span>
+    <span class="not">${not}</span>
+  </button>`).join('');
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('.kutu');
+  if (!b) return;
+  const yaz = () => { b.classList.add('kopya'); setTimeout(() => b.classList.remove('kopya'), 900); };
+  try { navigator.clipboard.writeText(b.dataset.kopya).then(yaz, yaz); } catch (_) { yaz(); }
+});
+</script>
+</body>
+</html>

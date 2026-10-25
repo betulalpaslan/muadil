@@ -1,6 +1,6 @@
 # ADR-002: Kimlik doğrulama için Keycloak kullanılması
 
-**Durum:** Kabul edildi
+**Durum:** Yerine ADR-008 geçti (Keycloak kaldırıldı)
 **Tarih:** 02.10.2026
 
 ## Bağlam

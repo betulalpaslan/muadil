@@ -1,0 +1,2 @@
+ALTER TABLE "parfum_nota" DROP CONSTRAINT "parfum_nota_parfum_id_nota_id_pk";--> statement-breakpoint
+ALTER TABLE "parfum_nota" ADD CONSTRAINT "parfum_nota_parfum_id_nota_id_katman_pk" PRIMARY KEY("parfum_id","nota_id","katman");

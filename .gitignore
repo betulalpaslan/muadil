@@ -489,3 +489,7 @@ $RECYCLE.BIN/
 /*.zip
 /*.xlsx
 /orijinal-fiyat-kaldirma/
+
+# Claude dropoff (ham çıktılar)
+docs/dropoff/*
+!docs/dropoff/README.md

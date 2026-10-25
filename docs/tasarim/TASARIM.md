@@ -15,7 +15,7 @@ Bu klasördekiler:
 
 | Konu | Kural |
 |---|---|
-| Yazı tipi | Tüm sistem tek aile: Outfit (200–800, `@fontsource/outfit`); başka font kullanılmaz. Kapak başlığındaki fark ("ZARA" 400, alt başlık 200) yalnızca ağırlıktan gelir. Google Fonts kullanılmaz. Değiştirmek gerekirse yalnızca `--font-govde` değişir; Syne (çok geniş durduğu için), Poppins, Jost, Bodoni Moda ve Cormorant Garamond denendi. |
+| Yazı tipi | Tüm sistem tek aile: Schibsted Grotesk (400–800, `@fontsource/schibsted-grotesk`); başka font kullanılmaz. Kapak başlığındaki fark ("ZARA" 400, alt başlık 200) yalnızca ağırlıktan gelir. Google Fonts kullanılmaz. Değiştirmek gerekirse yalnızca `--font-govde` değişir; Outfit (200–800, önceki seçim), Syne (çok geniş durduğu için), Poppins, Jost, Bodoni Moda ve Cormorant Garamond denendi. |
 | ₺ işareti | "Lira Isareti" yüzü yalnızca U+20BA için Inter kullanır. `tl()` biçimi aynen kalır. |
 | Başlık | `genis` sınıfı: büyük harf, `letter-spacing: .08em`, 500 ağırlık. Vurgulu kelime 800 ağırlık ya da `text-vurgu` renginde. Satır yüksekliği 1.3–1.45, kelime aralığı .2–.35em. |
 | Etiket | `kucuk` sınıfı: 11px, 500, `letter-spacing: .16em`, büyük harf. |

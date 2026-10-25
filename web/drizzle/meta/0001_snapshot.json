@@ -1,0 +1,577 @@
+{
+  "id": "3a53ca7a-523d-4677-967f-d3c82bfde4ee",
+  "prevId": "79554da3-869c-4110-97b4-417b98361610",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.arama_logu": {
+      "name": "arama_logu",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sorgu": {
+          "name": "sorgu",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sonuc_sayisi": {
+          "name": "sonuc_sayisi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zaman": {
+          "name": "zaman",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cikis_tiklamasi": {
+      "name": "cikis_tiklamasi",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "muadil_id": {
+          "name": "muadil_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kaynak": {
+          "name": "kaynak",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zaman": {
+          "name": "zaman",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cikis_tiklamasi_muadil_id_muadil_id_fk": {
+          "name": "cikis_tiklamasi_muadil_id_muadil_id_fk",
+          "tableFrom": "cikis_tiklamasi",
+          "columnsFrom": [
+            "muadil_id"
+          ],
+          "tableTo": "muadil",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.marka": {
+      "name": "marka",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tur": {
+          "name": "tur",
+          "type": "marka_turu",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gorsel_url": {
+          "name": "gorsel_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "marka_ad_unique": {
+          "name": "marka_ad_unique",
+          "columns": [
+            "ad"
+          ],
+          "nullsNotDistinct": false
+        },
+        "marka_slug_unique": {
+          "name": "marka_slug_unique",
+          "columns": [
+            "slug"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.muadil": {
+      "name": "muadil",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "parfum_id": {
+          "name": "parfum_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "marka_id": {
+          "name": "marka_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kod": {
+          "name": "kod",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cinsiyet": {
+          "name": "cinsiyet",
+          "type": "cinsiyet",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unisex'"
+        },
+        "fiyat": {
+          "name": "fiyat",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fiyat_tarihi": {
+          "name": "fiyat_tarihi",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "urun_linki": {
+          "name": "urun_linki",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kalicilik_puani": {
+          "name": "kalicilik_puani",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "benzerlik_puani": {
+          "name": "benzerlik_puani",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "silinme_tarihi": {
+          "name": "silinme_tarihi",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "muadil_parfum_idx": {
+          "name": "muadil_parfum_idx",
+          "columns": [
+            {
+              "expression": "parfum_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "muadil_parfum_id_parfum_id_fk": {
+          "name": "muadil_parfum_id_parfum_id_fk",
+          "tableFrom": "muadil",
+          "columnsFrom": [
+            "parfum_id"
+          ],
+          "tableTo": "parfum",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "muadil_marka_id_marka_id_fk": {
+          "name": "muadil_marka_id_marka_id_fk",
+          "tableFrom": "muadil",
+          "columnsFrom": [
+            "marka_id"
+          ],
+          "tableTo": "marka",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "muadil_slug_unique": {
+          "name": "muadil_slug_unique",
+          "columns": [
+            "slug"
+          ],
+          "nullsNotDistinct": false
+        },
+        "muadil_marka_id_kod_cinsiyet_unique": {
+          "name": "muadil_marka_id_kod_cinsiyet_unique",
+          "columns": [
+            "marka_id",
+            "kod",
+            "cinsiyet"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.nota": {
+      "name": "nota",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gorsel_url": {
+          "name": "gorsel_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aciklama": {
+          "name": "aciklama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "nota_ad_unique": {
+          "name": "nota_ad_unique",
+          "columns": [
+            "ad"
+          ],
+          "nullsNotDistinct": false
+        },
+        "nota_slug_unique": {
+          "name": "nota_slug_unique",
+          "columns": [
+            "slug"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.parfum": {
+      "name": "parfum",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "marka_id": {
+          "name": "marka_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ad": {
+          "name": "ad",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cinsiyet": {
+          "name": "cinsiyet",
+          "type": "cinsiyet",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unisex'"
+        },
+        "gorsel_url": {
+          "name": "gorsel_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "renk": {
+          "name": "renk",
+          "type": "varchar(7)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "silinme_tarihi": {
+          "name": "silinme_tarihi",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "parfum_marka_id_marka_id_fk": {
+          "name": "parfum_marka_id_marka_id_fk",
+          "tableFrom": "parfum",
+          "columnsFrom": [
+            "marka_id"
+          ],
+          "tableTo": "marka",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "parfum_slug_unique": {
+          "name": "parfum_slug_unique",
+          "columns": [
+            "slug"
+          ],
+          "nullsNotDistinct": false
+        },
+        "parfum_marka_id_ad_unique": {
+          "name": "parfum_marka_id_ad_unique",
+          "columns": [
+            "marka_id",
+            "ad"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.parfum_nota": {
+      "name": "parfum_nota",
+      "schema": "",
+      "columns": {
+        "parfum_id": {
+          "name": "parfum_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nota_id": {
+          "name": "nota_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "katman": {
+          "name": "katman",
+          "type": "nota_katmani",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "parfum_nota_nota_idx": {
+          "name": "parfum_nota_nota_idx",
+          "columns": [
+            {
+              "expression": "nota_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "parfum_nota_parfum_id_parfum_id_fk": {
+          "name": "parfum_nota_parfum_id_parfum_id_fk",
+          "tableFrom": "parfum_nota",
+          "columnsFrom": [
+            "parfum_id"
+          ],
+          "tableTo": "parfum",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "parfum_nota_nota_id_nota_id_fk": {
+          "name": "parfum_nota_nota_id_nota_id_fk",
+          "tableFrom": "parfum_nota",
+          "columnsFrom": [
+            "nota_id"
+          ],
+          "tableTo": "nota",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "parfum_nota_parfum_id_nota_id_pk": {
+          "name": "parfum_nota_parfum_id_nota_id_pk",
+          "columns": [
+            "parfum_id",
+            "nota_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.cinsiyet": {
+      "name": "cinsiyet",
+      "schema": "public",
+      "values": [
+        "kadin",
+        "erkek",
+        "unisex"
+      ]
+    },
+    "public.marka_turu": {
+      "name": "marka_turu",
+      "schema": "public",
+      "values": [
+        "orijinal",
+        "muadil"
+      ]
+    },
+    "public.nota_katmani": {
+      "name": "nota_katmani",
+      "schema": "public",
+      "values": [
+        "ust",
+        "orta",
+        "alt"
+      ]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
